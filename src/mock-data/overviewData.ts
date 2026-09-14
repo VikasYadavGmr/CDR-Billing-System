@@ -143,10 +143,10 @@ export const overviewKPIs: OverviewKPI[] = [
   {
     id: 'total-cost',
     title: 'Total Call Cost',
-    value: '₹48,520',
+    value: '€48,520',
     comparison: '+5.4%',
     isPositive: false,
-    tooltip: 'Estimated billable cost for the selected period (INR)',
+    tooltip: 'Estimated billable cost for the selected period (EUR)',
     relatedSection: 'department-usage',
   },
   {

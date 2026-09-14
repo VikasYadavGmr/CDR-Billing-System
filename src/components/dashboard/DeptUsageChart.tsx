@@ -42,7 +42,7 @@ export const DeptUsageChart: React.FC<DeptUsageChartProps> = ({ data }) => {
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 11, fill: '#64748b' }}
-              tickFormatter={(val) => `₹${val / 1000}k`}
+              tickFormatter={(val) => `€${val / 1000}k`}
             />
             <YAxis
               type="category"

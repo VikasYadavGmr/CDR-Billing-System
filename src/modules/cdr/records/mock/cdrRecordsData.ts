@@ -1,4 +1,45 @@
 import type { ComprehensiveCDRRecord, CDRSummaryKPIs } from '../types';
+import { mockTaxRules } from '../../../../mock-data/taxData';
+import { mockCountries, DEFAULT_BILLING_COUNTRY_CODE } from '../../../../mock-data/countryData';
+import { DEFAULT_SERVICE_TYPE } from '../../../../utils/billingCalculator';
+import { resolveTaxForTransaction } from '../../../../utils/taxEngine';
+
+/**
+ * Raw CDR rows carry the call charge only. Tax is applied afterwards by the tax
+ * engine so the records reflect whatever is configured in the Tax & VAT master.
+ */
+type BaseCDRRecord = Omit<
+  ComprehensiveCDRRecord,
+  | 'billingCountry'
+  | 'billingCountryCode'
+  | 'taxRuleId'
+  | 'taxType'
+  | 'taxName'
+  | 'taxRate'
+  | 'taxableAmount'
+  | 'taxStatus'
+>;
+
+/**
+ * Billing jurisdiction per cost centre. This is the business-defined tax
+ * jurisdiction of the billing entity — it is NOT derived from the number dialled.
+ */
+const DEPARTMENT_BILLING_COUNTRY: Record<string, string> = {
+  // Greece is the primary billing jurisdiction for this deployment.
+  'Airport Operations': 'EL',
+  Security: 'EL',
+  Administration: 'EL',
+  Finance: 'EL',
+  'Passenger Services': 'EL',
+  'Terminal Management': 'EL',
+  // Cost centres invoiced from other European entities.
+  'Ground Handling': 'FR',
+  Engineering: 'NL',
+  'Facility Management': 'NL',
+  IT: 'AT',
+};
+
+const FALLBACK_BILLING_COUNTRY = DEFAULT_BILLING_COUNTRY_CODE;
 
 export const mockCDRDepartmentsList = [
   'All Departments',
@@ -36,7 +77,7 @@ export const initialCDRSummaryKPIs: CDRSummaryKPIs = {
   totalBilling: 428640,
 };
 
-export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
+const baseCDRRecords: BaseCDRRecord[] = [
   {
     id: 'cdr-rec-001',
     cdrId: 'CDR-20260911-001',
@@ -52,11 +93,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-IP-1024',
     deviceType: 'IP Phone',
     deviceLocation: 'Terminal 1 — Operations Office',
-    destinationName: 'Delhi Metro Transit HQ',
+    destinationName: 'Athens Metro Transit HQ',
     destinationNumber: '011-45678901',
     destinationType: 'Local PSTN',
-    destinationLocation: 'New Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '04:32',
@@ -69,7 +110,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 4.61,
     taxAmount: 0.83,
     totalAmount: 5.44,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-001',
@@ -96,11 +137,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-IP-1102',
     deviceType: 'IP Phone',
     deviceLocation: 'Terminal 2 — Security Duty Room',
-    destinationName: 'CISF Command Control',
+    destinationName: 'Corporate Security Control',
     destinationNumber: 'EXT-1904',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Airport Airside',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '02:15',
@@ -113,7 +154,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-002',
@@ -157,7 +198,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 528.75,
     taxAmount: 95.18,
     totalAmount: 623.93,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-003',
@@ -188,7 +229,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1610',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Central Utilities Building',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '01:10',
@@ -201,7 +242,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-004',
@@ -231,8 +272,8 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationName: 'Directorate General of Civil Aviation',
     destinationNumber: '011-24622495',
     destinationType: 'Local PSTN',
-    destinationLocation: 'New Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '06:18',
@@ -245,7 +286,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 6.41,
     taxAmount: 1.15,
     totalAmount: 7.56,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-005',
@@ -272,11 +313,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-DIG-1520',
     deviceType: 'Digital Phone',
     deviceLocation: 'IT NOC & Server Room',
-    destinationName: 'Cisco TAC Support India',
+    destinationName: 'Cisco TAC Support Germany',
     destinationNumber: '1800-555-0199',
     destinationType: 'Toll-Free Helpline',
     destinationLocation: 'Bangalore',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Toll-Free',
     callType: 'External',
     durationFormatted: '14:20',
@@ -289,7 +330,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 14.58,
     taxAmount: 2.62,
     totalAmount: 17.2,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-006',
@@ -319,8 +360,8 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationName: 'Substation Maintenance Desk',
     destinationNumber: '011-25652000',
     destinationType: 'Local PSTN',
-    destinationLocation: 'Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '00:00',
@@ -333,7 +374,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Unbilled',
   },
   {
@@ -355,7 +396,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1904',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Apron Command Post',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '03:40',
@@ -368,7 +409,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-007',
@@ -399,7 +440,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: '022-61784000',
     destinationType: 'National STD',
     destinationLocation: 'Mumbai',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '22:15',
@@ -412,7 +453,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 22.63,
     taxAmount: 4.07,
     totalAmount: 26.7,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-008',
@@ -443,7 +484,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1102',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Security Post',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '01:50',
@@ -456,7 +497,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-009',
@@ -500,7 +541,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 633.75,
     taxAmount: 114.08,
     totalAmount: 747.83,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-010',
@@ -530,8 +571,8 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationName: 'Standby Generator Vendor Helpline',
     destinationNumber: '011-28549100',
     destinationType: 'Local PSTN',
-    destinationLocation: 'New Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '00:00',
@@ -544,7 +585,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Unbilled',
   },
   {
@@ -565,8 +606,8 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationName: 'Meteorological Office Weather Bureau',
     destinationNumber: '011-24611792',
     destinationType: 'Local PSTN',
-    destinationLocation: 'Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '07:20',
@@ -579,7 +620,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 7.46,
     taxAmount: 1.34,
     totalAmount: 8.8,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-011',
@@ -610,7 +651,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1024',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Terminal 1 Clinic',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '02:40',
@@ -623,7 +664,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-012',
@@ -654,7 +695,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1102',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Security HQ',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '04:15',
@@ -667,7 +708,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
     relatedCmr: {
       cmrId: 'CMR-20260911-013',
@@ -694,11 +735,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-IP-2512',
     deviceType: 'IP Phone',
     deviceLocation: 'Revenue & Accounts Wing',
-    destinationName: 'Reserve Bank of India Treasury Branch',
+    destinationName: 'European Central Bank Treasury Branch',
     destinationNumber: '022-22660500',
     destinationType: 'National STD',
     destinationLocation: 'Mumbai',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '11:30',
@@ -711,7 +752,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 11.69,
     taxAmount: 2.11,
     totalAmount: 13.8,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-014',
@@ -742,7 +783,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1520',
     destinationType: 'Internal Intercom',
     destinationLocation: 'NOC Room',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '00:00',
@@ -755,7 +796,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
   },
   {
@@ -790,7 +831,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 489.83,
     taxAmount: 88.17,
     totalAmount: 578.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-015',
@@ -820,8 +861,8 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationName: 'Customs & Cargo Screening Cell',
     destinationNumber: '011-25653400',
     destinationType: 'Local PSTN',
-    destinationLocation: 'Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '05:45',
@@ -834,7 +875,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 5.85,
     taxAmount: 1.05,
     totalAmount: 6.9,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
     relatedCmr: {
       cmrId: 'CMR-20260911-016',
@@ -865,7 +906,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1610',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Substation 4',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '01:25',
@@ -878,7 +919,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
   },
   {
@@ -896,11 +937,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-IP-1024',
     deviceType: 'IP Phone',
     deviceLocation: 'Terminal 1 — Operations Office',
-    destinationName: 'Air Traffic Control Tower Delhi',
+    destinationName: 'Air Traffic Control Tower Athens',
     destinationNumber: '011-25651234',
     destinationType: 'Local PSTN',
-    destinationLocation: 'New Delhi',
-    country: 'India',
+    destinationLocation: 'Athens',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '07:35',
@@ -913,7 +954,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 7.71,
     taxAmount: 1.39,
     totalAmount: 9.1,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
   },
   {
@@ -935,7 +976,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: '098-11223344',
     destinationType: 'National STD',
     destinationLocation: 'Gurgaon',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Mobile',
     callType: 'External',
     durationFormatted: '00:00',
@@ -948,7 +989,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Unbilled',
   },
   {
@@ -966,11 +1007,11 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     deviceId: 'DEV-CONF-1801',
     deviceType: 'Conference Phone',
     deviceLocation: 'Executive Boardroom T1',
-    destinationName: 'State Bank of India Corporate Banking Unit',
+    destinationName: 'State Bank of Germany Corporate Banking Unit',
     destinationNumber: '022-22740000',
     destinationType: 'National STD',
     destinationLocation: 'Mumbai',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Landline',
     callType: 'External',
     durationFormatted: '34:22',
@@ -983,7 +1024,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 43.69,
     taxAmount: 7.86,
     totalAmount: 51.55,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
   },
   {
@@ -1005,7 +1046,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: 'EXT-1024',
     destinationType: 'Internal Intercom',
     destinationLocation: 'Terminal 1 Ground Level',
-    country: 'India',
+    country: 'Germany',
     numberType: 'SIP Extension',
     callType: 'Internal',
     durationFormatted: '03:10',
@@ -1018,7 +1059,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 0.0,
     taxAmount: 0.0,
     totalAmount: 0.0,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Exempted',
   },
   {
@@ -1040,7 +1081,7 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     destinationNumber: '1800-103-0011',
     destinationType: 'Toll-Free Helpline',
     destinationLocation: 'Bangalore',
-    country: 'India',
+    country: 'Germany',
     numberType: 'Toll-Free',
     callType: 'External',
     durationFormatted: '06:15',
@@ -1053,7 +1094,41 @@ export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = [
     callCost: 6.36,
     taxAmount: 1.14,
     totalAmount: 7.5,
-    currency: 'INR',
+    currency: 'EUR',
     billingStatus: 'Billed',
   },
 ];
+
+/**
+ * Applies the Tax & VAT master to every CDR row: billing country resolves a tax
+ * rule for the call date, which produces the tax and total. Rows with no
+ * applicable rule are flagged TAX_REVIEW_REQUIRED instead of being given a
+ * guessed rate.
+ */
+export const mockComprehensiveCDRRecords: ComprehensiveCDRRecord[] = baseCDRRecords.map((record) => {
+  const billingCountryCode =
+    DEPARTMENT_BILLING_COUNTRY[record.department] ?? FALLBACK_BILLING_COUNTRY;
+  const billingCountry =
+    mockCountries.find((c) => c.isoCode === billingCountryCode)?.countryName ?? billingCountryCode;
+
+  const tax = resolveTaxForTransaction(mockTaxRules, {
+    amount: record.callCost,
+    billingCountryCode,
+    serviceType: DEFAULT_SERVICE_TYPE,
+    transactionDate: record.startDate,
+  });
+
+  return {
+    ...record,
+    billingCountry,
+    billingCountryCode,
+    taxRuleId: tax.taxRuleId,
+    taxType: tax.taxType,
+    taxName: tax.taxName,
+    taxRate: tax.taxRate,
+    taxableAmount: tax.taxableAmount,
+    taxAmount: tax.taxAmount,
+    totalAmount: tax.totalAmount,
+    taxStatus: tax.taxStatus,
+  };
+});

@@ -47,7 +47,7 @@ export const BillingTrendChart: React.FC<BillingTrendChartProps> = ({ data }) =>
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#64748b' }}
-              tickFormatter={(val) => `₹${val / 1000}k`}
+              tickFormatter={(val) => `€${val / 1000}k`}
             />
             <Tooltip
               formatter={(val: any) => [formatCurrency(Number(val)), 'Total Invoiced']}

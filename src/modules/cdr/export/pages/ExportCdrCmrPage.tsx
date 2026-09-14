@@ -372,7 +372,7 @@ export const ExportCdrCmrPage: React.FC = () => {
         obj['Duration'] = r.duration;
         if (toggles.includeBilling) {
           obj['Tariff'] = r.tariff;
-          obj['Amount (INR)'] = r.amount.toFixed(2);
+          obj['Amount (EUR)'] = r.amount.toFixed(2);
         }
         obj['Status'] = r.status;
         return obj;

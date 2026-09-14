@@ -11,8 +11,10 @@ import {
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  Percent,
   PhoneCall,
   Receipt,
+  ScrollText,
   Settings,
   Users,
   X,
@@ -42,10 +44,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
     { name: 'Extensions', path: '/extensions', icon: PhoneCall },
     { name: 'Departments', path: '/departments', icon: Building2 },
     { name: 'Billing', path: '/billing', icon: Receipt },
-    { name: 'Reports', path: '/reports', icon: BarChart3 },
+    { name: 'Tax & VAT', path: '/tax', icon: Percent },
     { name: 'Rate Plans', path: '/rate-plans', icon: Coins },
+    { name: 'Reports', path: '/reports', icon: BarChart3 },
     { name: 'Users', path: '/users', icon: Users },
     { name: 'Settings', path: '/settings', icon: Settings },
+    { name: 'Audit Logs', path: '/audit-logs', icon: ScrollText },
   ];
 
   const handleLogout = () => {
@@ -219,7 +223,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
                 <strong>• Extensions & Departments:</strong> Manage airport terminals, SIP/analog lines, department allocations, and cost limits.
               </p>
               <p>
-                <strong>• Billing & Rate Plans:</strong> Calculate monthly invoices, configure GST, and customize per-minute tariffs.
+                <strong>• Billing & Rate Plans:</strong> Calculate monthly invoices, review tax summaries, and customize per-minute tariffs.
+              </p>
+              <p>
+                <strong>• Tax & VAT:</strong> Maintain the Country Master and country-wise VAT rules the billing engine applies when rating calls.
               </p>
             </div>
             <div className="flex justify-end pt-2">

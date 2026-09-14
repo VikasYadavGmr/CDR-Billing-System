@@ -20,7 +20,7 @@ export const CDRFilterBar: React.FC<CDRFilterBarProps> = ({
   const departments = [
     'ALL',
     'Airport Operations',
-    'Security & CISF',
+    'Security & Compliance',
     'Engineering & Maint',
     'Customer Service',
     'Cargo Operations',

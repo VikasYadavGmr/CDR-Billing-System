@@ -113,7 +113,7 @@ export const UsersPage: React.FC = () => {
       { key: 'extension', label: 'Assigned Extension' },
       { key: 'deviceModel', label: 'Device Model' },
       { key: 'monthlyCalls', label: 'Monthly Calls' },
-      { key: 'monthlyCost', label: 'Monthly Cost (INR)' },
+      { key: 'monthlyCost', label: 'Monthly Cost (EUR)' },
       { key: 'status', label: 'Account Status' },
       { key: 'lastLogin', label: 'Last Login' },
     ]);
@@ -379,7 +379,7 @@ export const UsersPage: React.FC = () => {
                 className="w-full px-3 py-2 border border-input rounded-md text-xs bg-background focus:outline-none"
               >
                 <option value="Airport Operations">Airport Operations</option>
-                <option value="Security & CISF">Security & CISF</option>
+                <option value="Security & Compliance">Security & Compliance</option>
                 <option value="Engineering & Maint">Engineering & Maint</option>
                 <option value="Customer Service">Customer Service</option>
                 <option value="Cargo Operations">Cargo Operations</option>

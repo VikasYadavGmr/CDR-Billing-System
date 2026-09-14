@@ -3,7 +3,16 @@ import type { RatePlanItem } from '../../types/billing';
 import { billingService } from '../../services/billingService';
 import { Badge } from '../../components/common/Badge';
 import { Modal } from '../../components/common/Modal';
-import { formatCurrency, calculateCallCost, formatDuration } from '../../utils/billingCalculator';
+import type { TaxRule } from '../../types/tax';
+import { taxService } from '../../services/taxService';
+import { DEFAULT_BILLING_COUNTRY_CODE } from '../../mock-data/countryData';
+import {
+  formatCurrency,
+  calculateCallCost,
+  formatDuration,
+  formatRate,
+  DEFAULT_SERVICE_TYPE,
+} from '../../utils/billingCalculator';
 import {
   Edit2,
   Calculator,
@@ -13,6 +22,7 @@ export const RatePlans: React.FC = () => {
   const [rates, setRates] = useState<RatePlanItem[]>([]);
   const [editingRate, setEditingRate] = useState<RatePlanItem | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [taxRule, setTaxRule] = useState<TaxRule | null>(null);
 
   // Live Calculator State
   const [calcType, setCalcType] = useState('STD');
@@ -25,6 +35,19 @@ export const RatePlans: React.FC = () => {
       setRates(data);
     };
     fetchRates();
+  }, []);
+
+  // The calculator applies the same rule the billing engine would resolve today.
+  useEffect(() => {
+    const fetchTaxRule = async () => {
+      const rule = await taxService.findApplicableTaxRule(
+        DEFAULT_BILLING_COUNTRY_CODE,
+        DEFAULT_SERVICE_TYPE,
+        new Date().toISOString().slice(0, 10)
+      );
+      setTaxRule(rule);
+    };
+    fetchTaxRule();
   }, []);
 
   const handleOpenEdit = (item: RatePlanItem) => {
@@ -48,7 +71,7 @@ export const RatePlans: React.FC = () => {
     totalDurationSeconds,
     selectedRateObj ? selectedRateObj.ratePerMinute : 0,
     60,
-    18
+    taxRule
   );
 
   return (
@@ -71,7 +94,7 @@ export const RatePlans: React.FC = () => {
                 <tr className="bg-slate-100/70 border-b border-border text-muted-foreground font-semibold">
                   <th className="py-3 px-3.5">Call Type</th>
                   <th className="py-3 px-3.5">Description</th>
-                  <th className="py-3 px-3.5 text-right">Tariff (₹/min)</th>
+                  <th className="py-3 px-3.5 text-right">Tariff (€/min)</th>
                   <th className="py-3 px-3.5 text-center">Pulse</th>
                   <th className="py-3 px-3.5">Effective Date</th>
                   <th className="py-3 px-3.5 text-center">Status</th>
@@ -120,7 +143,9 @@ export const RatePlans: React.FC = () => {
             </div>
             <div>
               <h3 className="font-bold text-sm text-foreground">Tariff Test Calculator</h3>
-              <p className="text-[11px] text-muted-foreground">Test rate calculations & GST computation</p>
+              <p className="text-[11px] text-muted-foreground">
+                Rate calculation with VAT resolved from the Tax &amp; VAT master
+              </p>
             </div>
           </div>
 
@@ -179,7 +204,11 @@ export const RatePlans: React.FC = () => {
                 <span className="font-mono font-semibold text-slate-900">{formatCurrency(calcResult.subtotal)}</span>
               </div>
               <div className="flex justify-between text-xs text-slate-600">
-                <span>GST (18%)</span>
+                <span>
+                  {taxRule
+                    ? `${taxRule.taxName} ${formatRate(taxRule.rate)} — ${taxRule.countryName}`
+                    : 'No applicable tax rule'}
+                </span>
                 <span className="font-mono font-semibold text-slate-900">{formatCurrency(calcResult.taxAmount)}</span>
               </div>
               <div className="flex justify-between text-sm font-bold pt-2 border-t border-slate-200 text-emerald-700">
@@ -230,7 +259,7 @@ export const RatePlans: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Rate per Minute (₹)</label>
+              <label className="block text-slate-700 font-semibold mb-1">Rate per Minute (€)</label>
               <input
                 type="number"
                 step="0.10"

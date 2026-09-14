@@ -15,6 +15,13 @@ import type {
   TopDurationRow,
   UserDailyConsumption,
 } from '../types';
+import { mockTaxRules } from '../../../../../mock-data/taxData';
+import { DEFAULT_BILLING_COUNTRY_CODE } from '../../../../../mock-data/countryData';
+import { DEFAULT_SERVICE_TYPE } from '../../../../../utils/billingCalculator';
+import { findApplicableTaxRule, resolveTaxForTransaction } from '../../../../../utils/taxEngine';
+
+/** Statement period these demo bills cover; drives the tax rule lookup. */
+const INDIVIDUAL_BILL_PERIOD_END = '2026-08-31';
 
 export const reportUsers: ReportUserOption[] = [
   { id: 'u1', name: 'Rahul Sharma', employeeId: 'EMP-10231', extension: '2451', department: 'Airport Operations', location: 'Terminal 3' },
@@ -74,7 +81,7 @@ export const reportGateways = ['All Gateways', 'GW-DEL-01', 'GW-DEL-02', 'GW-DEL
 export const reportTrunks = ['All Trunks', 'SIP-01', 'SIP-02', 'PRI-01', 'PRI-02', 'Internal'];
 export const topNOptions = [5, 10, 20, 50];
 
-export const individualBillSummaries: Record<string, IndividualBillSummary> = {
+const individualBillSummarySeeds: Record<string, IndividualBillSummary> = {
   u1: {
     totalCalls: 148,
     incomingCalls: 55,
@@ -83,7 +90,7 @@ export const individualBillSummaries: Record<string, IndividualBillSummary> = {
     billableCalls: 81,
     totalTalkTime: '08h 42m 30s',
     subtotal: 624.5,
-    gst: 112.41,
+    vat: 112.41,
     totalAmount: 736.91,
   },
   u2: {
@@ -94,7 +101,7 @@ export const individualBillSummaries: Record<string, IndividualBillSummary> = {
     billableCalls: 69,
     totalTalkTime: '07h 15m 10s',
     subtotal: 512.2,
-    gst: 92.2,
+    vat: 92.2,
     totalAmount: 604.4,
   },
   u3: {
@@ -105,7 +112,7 @@ export const individualBillSummaries: Record<string, IndividualBillSummary> = {
     billableCalls: 61,
     totalTalkTime: '06h 28m 45s',
     subtotal: 448.0,
-    gst: 80.64,
+    vat: 80.64,
     totalAmount: 528.64,
   },
   u4: {
@@ -116,21 +123,47 @@ export const individualBillSummaries: Record<string, IndividualBillSummary> = {
     billableCalls: 54,
     totalTalkTime: '05h 12m 20s',
     subtotal: 386.5,
-    gst: 69.57,
+    vat: 69.57,
     totalAmount: 456.07,
   },
   u5: {
     totalCalls: 104,
+
     incomingCalls: 38,
     outgoingCalls: 66,
     internalCalls: 31,
     billableCalls: 58,
     totalTalkTime: '05h 55m 05s',
     subtotal: 410.8,
-    gst: 73.94,
+    vat: 73.94,
     totalAmount: 484.74,
   },
 };
+
+/**
+ * VAT on individual staff bills is re-derived from the Tax & VAT master for the
+ * billing entity's jurisdiction, so these statements move with the configured
+ * rate instead of carrying a baked-in percentage.
+ */
+export const individualBillSummaries: Record<string, IndividualBillSummary> = Object.fromEntries(
+  Object.entries(individualBillSummarySeeds).map(([key, summary]) => {
+    const tax = resolveTaxForTransaction(mockTaxRules, {
+      amount: summary.subtotal,
+      billingCountryCode: DEFAULT_BILLING_COUNTRY_CODE,
+      serviceType: DEFAULT_SERVICE_TYPE,
+      transactionDate: INDIVIDUAL_BILL_PERIOD_END,
+    });
+    return [key, { ...summary, vat: tax.taxAmount, totalAmount: tax.totalAmount }];
+  })
+);
+
+/** Rate applied to the individual-bill statements, for UI labelling. */
+export const individualBillTaxRule = findApplicableTaxRule(
+  mockTaxRules,
+  DEFAULT_BILLING_COUNTRY_CODE,
+  DEFAULT_SERVICE_TYPE,
+  INDIVIDUAL_BILL_PERIOD_END
+);
 
 export const individualBillInfo: Record<string, IndividualBillInfo> = {
   u1: {
@@ -191,7 +224,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'STD',
     direction: 'Outgoing',
     duration: '05:42',
-    rate: '₹1.50/min',
+    rate: '€1.50/min',
     baseCharge: 8.55,
     tax: 1.54,
     totalCharge: 10.09,
@@ -208,7 +241,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Mobile',
     direction: 'Outgoing',
     duration: '05:21',
-    rate: '₹1.20/min',
+    rate: '€1.20/min',
     baseCharge: 6.42,
     tax: 1.16,
     totalCharge: 7.58,
@@ -225,7 +258,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Internal',
     direction: 'Incoming',
     duration: '02:14',
-    rate: '₹0.00/min',
+    rate: '€0.00/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -242,7 +275,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'STD',
     direction: 'Outgoing',
     duration: '08:40',
-    rate: '₹1.50/min',
+    rate: '€1.50/min',
     baseCharge: 13.0,
     tax: 2.34,
     totalCharge: 15.34,
@@ -259,7 +292,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'International',
     direction: 'Outgoing',
     duration: '04:18',
-    rate: '₹8.00/min',
+    rate: '€8.00/min',
     baseCharge: 34.4,
     tax: 6.19,
     totalCharge: 40.59,
@@ -276,7 +309,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Local',
     direction: 'Incoming',
     duration: '06:05',
-    rate: '₹0.00/min',
+    rate: '€0.00/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -293,7 +326,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Mobile',
     direction: 'Outgoing',
     duration: '00:00',
-    rate: '₹1.20/min',
+    rate: '€1.20/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -310,7 +343,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Internal',
     direction: 'Outgoing',
     duration: '01:55',
-    rate: '₹0.00/min',
+    rate: '€0.00/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -327,7 +360,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'STD',
     direction: 'Outgoing',
     duration: '12:10',
-    rate: '₹1.50/min',
+    rate: '€1.50/min',
     baseCharge: 18.25,
     tax: 3.29,
     totalCharge: 21.54,
@@ -344,7 +377,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Mobile',
     direction: 'Outgoing',
     duration: '07:32',
-    rate: '₹1.20/min',
+    rate: '€1.20/min',
     baseCharge: 9.04,
     tax: 1.63,
     totalCharge: 10.67,
@@ -361,7 +394,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Local',
     direction: 'Incoming',
     duration: '04:02',
-    rate: '₹0.00/min',
+    rate: '€0.00/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -378,7 +411,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Local',
     direction: 'Outgoing',
     duration: '02:48',
-    rate: '₹0.50/min',
+    rate: '€0.50/min',
     baseCharge: 1.4,
     tax: 0.25,
     totalCharge: 1.65,
@@ -395,7 +428,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'International',
     direction: 'Outgoing',
     duration: '06:12',
-    rate: '₹8.00/min',
+    rate: '€8.00/min',
     baseCharge: 49.6,
     tax: 8.93,
     totalCharge: 58.53,
@@ -412,7 +445,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Mobile',
     direction: 'Outgoing',
     duration: '04:50',
-    rate: '₹1.20/min',
+    rate: '€1.20/min',
     baseCharge: 5.8,
     tax: 1.04,
     totalCharge: 6.84,
@@ -429,7 +462,7 @@ export const individualBillRows: IndividualBillRow[] = [
     callType: 'Internal',
     direction: 'Incoming',
     duration: '03:10',
-    rate: '₹0.00/min',
+    rate: '€0.00/min',
     baseCharge: 0.0,
     tax: 0.0,
     totalCharge: 0.0,
@@ -1126,19 +1159,19 @@ export function getCallDetailsFromRow(row: CallHistoryRow | IndividualBillRow, u
     location,
     destinationNumber: destNumber,
     destinationType: callType === 'Mobile' ? 'Cellular PSTN' : callType === 'International' ? 'International Trunk' : 'Fixed Landline',
-    destinationLocation: callType === 'Local' ? 'Delhi NCR' : callType === 'STD' ? 'Mumbai / Kolkata' : callType === 'International' ? 'London / Dubai' : 'Internal PBX',
+    destinationLocation: callType === 'Local' ? 'Athens Metro' : callType === 'STD' ? 'Thessaloniki / Patras' : callType === 'International' ? 'London / Zurich' : 'Internal PBX',
     gateway: isHistory ? (row as CallHistoryRow).gateway : 'GW-DEL-01',
     trunk: isHistory ? (row as CallHistoryRow).trunk : 'SIP-01',
     routePattern: callType === 'International' ? '00.!' : callType === 'STD' ? '0.XXXXXXXXXX' : callType === 'Mobile' ? '9.XXXXXXXXXX' : '9.@',
     routeGroup: 'RG-SIP-PRIMARY',
     ratePlan: 'Airport Executive Tariff',
-    rate: 'rate' in row ? (row as IndividualBillRow).rate : cost > 0 ? '₹1.20/min' : '₹0.00/min',
+    rate: 'rate' in row ? (row as IndividualBillRow).rate : cost > 0 ? '€1.20/min' : '€0.00/min',
     billingDuration: duration,
     baseCharge: 'baseCharge' in row ? (row as IndividualBillRow).baseCharge : Number((cost / 1.18).toFixed(2)),
     tax: 'tax' in row ? (row as IndividualBillRow).tax : Number((cost - cost / 1.18).toFixed(2)),
     totalCharge: cost,
     billingStatus,
-    currency: 'INR',
+    currency: 'EUR',
     terminationCauseCode: status === 'Completed' ? '16' : status === 'Busy' ? '17' : status === 'Missed' ? '19' : '31',
     terminationCause: isHistory ? (row as CallHistoryRow).terminationCause : status === 'Completed' ? 'Normal Call Clearing' : 'Call Rejected/Busy',
     disconnectReason: status === 'Completed' ? 'Normal Disconnect (Caller)' : 'Destination Unreachable',
@@ -1214,8 +1247,8 @@ export function getUserDailyConsumption(userId: string, period: string = 'last-7
     const durationFormatted = `${hoursPart > 0 ? `${hoursPart}h ` : ''}${minsPart}m ${secsPart}s`;
 
     const baseCharge = Number((billable * 3.45 + (userSeed % 2) * 1.2).toFixed(2));
-    const gst = Number((baseCharge * 0.18).toFixed(2));
-    const totalCost = Number((baseCharge + gst).toFixed(2));
+    const vat = Number((baseCharge * 0.18).toFixed(2));
+    const totalCost = Number((baseCharge + vat).toFixed(2));
     const avgQoS = Number((91.5 + ((index * 3) % 7) - 2.5).toFixed(1));
 
     return {
@@ -1230,7 +1263,7 @@ export function getUserDailyConsumption(userId: string, period: string = 'last-7
       totalDurationFormatted: durationFormatted,
       billableMinutes: minutes,
       baseCharge,
-      gst,
+      vat,
       totalCost,
       avgQoSScore: Math.min(99, Math.max(82, avgQoS)),
     };

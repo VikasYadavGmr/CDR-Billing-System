@@ -151,7 +151,7 @@ export const DeviceDetailDrawer: React.FC<DeviceDetailDrawerProps> = ({
                   <div className="flex justify-between text-xs">
                     <span className="font-semibold text-slate-800">{item.category}</span>
                     <span className="font-mono text-slate-700">
-                      {item.calls} calls ({item.percentage}%) • {item.billing > 0 ? formatCurrency(item.billing) : '₹0.00'}
+                      {item.calls} calls ({item.percentage}%) • {item.billing > 0 ? formatCurrency(item.billing) : '€0.00'}
                     </span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">

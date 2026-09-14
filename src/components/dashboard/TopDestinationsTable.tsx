@@ -85,7 +85,7 @@ export const TopDestinationsTable: React.FC<TopDestinationsTableProps> = ({ data
                     {row.callType}
                   </Badge>
                 </td>
-                <td className="py-2.5 px-3 font-medium">{row.totalCalls.toLocaleString('en-IN')}</td>
+                <td className="py-2.5 px-3 font-medium">{row.totalCalls.toLocaleString('en-IE')}</td>
                 <td className="py-2.5 px-3 font-mono text-slate-600">{row.totalDuration}</td>
                 <td className="py-2.5 px-3 font-bold text-slate-900">{formatCurrency(row.totalCost, false)}</td>
               </tr>

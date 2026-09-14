@@ -293,19 +293,19 @@ export const CDRAdvancedFilters: React.FC<CDRAdvancedFiltersProps> = ({
         {/* Billing Range */}
         <div>
           <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-            Billing Amount Range (₹ INR)
+            Billing Amount Range (€ EUR)
           </label>
           <div className="grid grid-cols-2 gap-2">
             <input
               type="number"
-              placeholder="Min ₹"
+              placeholder="Min €"
               value={filters.minAmount || ''}
               onChange={(e) => onFilterChange({ ...filters, minAmount: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
             <input
               type="number"
-              placeholder="Max ₹"
+              placeholder="Max €"
               value={filters.maxAmount || ''}
               onChange={(e) => onFilterChange({ ...filters, maxAmount: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 font-mono focus:outline-none focus:ring-1 focus:ring-teal-500"

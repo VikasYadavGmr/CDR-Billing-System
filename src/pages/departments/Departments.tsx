@@ -33,8 +33,8 @@ export const Departments: React.FC = () => {
       { key: 'totalCalls', label: 'Total Calls' },
       { key: 'totalDurationHours', label: 'Talk Time (Hours)' },
       { key: 'billableCalls', label: 'Billable Calls' },
-      { key: 'monthlyCost', label: 'Monthly Cost (₹)' },
-      { key: 'budgetAllocation', label: 'Telecom Budget (₹)' },
+      { key: 'monthlyCost', label: 'Monthly Cost (€)' },
+      { key: 'budgetAllocation', label: 'Telecom Budget (€)' },
       { key: 'status', label: 'Status' },
     ]);
   };
@@ -155,7 +155,7 @@ export const Departments: React.FC = () => {
                 <th className="py-3 px-3.5 text-right">Total Calls</th>
                 <th className="py-3 px-3.5 text-right">Talk Time</th>
                 <th className="py-3 px-3.5 text-right">Billable Calls</th>
-                <th className="py-3 px-3.5 text-right">Monthly Cost (₹)</th>
+                <th className="py-3 px-3.5 text-right">Monthly Cost (€)</th>
                 <th className="py-3 px-3.5 text-center">Action</th>
               </tr>
             </thead>

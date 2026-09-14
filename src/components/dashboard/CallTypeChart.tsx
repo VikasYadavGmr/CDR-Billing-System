@@ -43,7 +43,7 @@ export const CallTypeChart: React.FC<CallTypeChartProps> = ({ data, highlighted 
                 formatter={(value, name) => {
                   const n = Number(value ?? 0);
                   const pct = total ? ((n / total) * 100).toFixed(1) : '0';
-                  return [`${n.toLocaleString('en-IN')} (${pct}%)`, String(name)];
+                  return [`${n.toLocaleString('en-IE')} (${pct}%)`, String(name)];
                 }}
                 contentStyle={{
                   backgroundColor: '#ffffff',
@@ -56,7 +56,7 @@ export const CallTypeChart: React.FC<CallTypeChartProps> = ({ data, highlighted 
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Total</span>
-            <span className="text-base font-bold text-slate-900">{total.toLocaleString('en-IN')}</span>
+            <span className="text-base font-bold text-slate-900">{total.toLocaleString('en-IE')}</span>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ export const CallTypeChart: React.FC<CallTypeChartProps> = ({ data, highlighted 
                   <span className="text-slate-700 font-medium truncate">{item.name}</span>
                 </div>
                 <div className="flex items-center space-x-2 flex-shrink-0">
-                  <span className="text-slate-500 font-mono text-[11px]">{item.value.toLocaleString('en-IN')}</span>
+                  <span className="text-slate-500 font-mono text-[11px]">{item.value.toLocaleString('en-IE')}</span>
                   <span className="font-bold text-slate-800 w-10 text-right">{pct}%</span>
                 </div>
               </div>

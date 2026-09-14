@@ -1,3 +1,5 @@
+import type { TaxStatus, TaxType } from '../../../../types/tax';
+
 export type CallType = 'Internal' | 'External' | 'International';
 export type CallStatus = 'Completed' | 'Failed' | 'Busy' | 'No Answer' | 'Cancelled';
 export type CallDirection = 'Incoming' | 'Outgoing';
@@ -42,8 +44,20 @@ export interface ComprehensiveCDRRecord {
   callCost: number;
   taxAmount: number;
   totalAmount: number;
-  currency: 'INR';
+  currency: 'EUR';
   billingStatus: 'Billed' | 'Unbilled' | 'Exempted';
+
+  // Tax / VAT — resolved from the Tax & VAT master, not stored per country.
+  // `billingCountry` is the tax jurisdiction of the billing entity and is
+  // deliberately distinct from the call's destination `country`.
+  billingCountry: string;
+  billingCountryCode: string;
+  taxRuleId: string | null;
+  taxType: TaxType | null;
+  taxName: string | null;
+  taxRate: number;
+  taxableAmount: number;
+  taxStatus: TaxStatus;
 
   // Related CMR Quality Data (if available)
   relatedCmr?: {

@@ -68,7 +68,7 @@ export const Login: React.FC = () => {
               Centralized Airport Telephone Accounting & Billing
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Track multi-department extensions, analyze incoming/outgoing trunks, audit STD/ISD usage, and generate monthly GST-compliant billing reports across all airport terminals.
+              Track multi-department extensions, analyze incoming/outgoing trunks, audit STD/ISD usage, and generate monthly VAT-compliant billing reports across all airport terminals.
             </p>
           </div>
 

@@ -207,7 +207,7 @@ export const CDRTable: React.FC<CDRTableProps> = ({ records, onSelectRecord }) =
                     {r.durationFormatted}
                   </td>
                   <td className="py-2.5 px-3.5 text-right font-mono text-muted-foreground text-[11px]">
-                    {r.ratePerMinute > 0 ? `₹${r.ratePerMinute.toFixed(2)}/m` : 'Free'}
+                    {r.ratePerMinute > 0 ? `€${r.ratePerMinute.toFixed(2)}/m` : 'Free'}
                   </td>
                   <td className="py-2.5 px-3.5 text-right font-mono font-bold text-emerald-700">
                     {formatCurrency(r.totalAmount)}

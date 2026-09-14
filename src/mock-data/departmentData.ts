@@ -18,8 +18,8 @@ export const mockDepartments: Department[] = [
   },
   {
     id: 'dept-2',
-    name: 'Security & CISF',
-    code: 'SEC-CISF',
+    name: 'Security & Compliance',
+    code: 'SEC-Corporate Security',
     headOfDepartment: 'Col. Vikramaditya Rathore',
     contactExtension: '3187',
     location: 'All Terminals & Perimeter Gates',

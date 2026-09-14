@@ -307,9 +307,9 @@ export const mockUsers: User[] = [
 export const mockSettings: SystemSettings = {
   organizationName: 'Airport Authority Telecom Wing',
   airportCode: 'DEL / VIDP',
-  currency: 'INR',
-  currencySymbol: '₹',
-  timeZone: 'Asia/Kolkata (IST +05:30)',
+  currency: 'EUR',
+  currencySymbol: '€',
+  timeZone: 'Europe/Athens (EET +02:00)',
   defaultTaxRate: 18,
   billingCycleDay: 1,
   gracePeriodDays: 20,
@@ -319,5 +319,5 @@ export const mockSettings: SystemSettings = {
   duplicateRecordHandling: 'FlagForReview',
   emailAlertsEnabled: true,
   contactEmail: 'telecom.billing@airport.gov.in',
-  contactPhone: '+91 11 2565 6000',
+  contactPhone: '+30 21 0900 6000',
 };

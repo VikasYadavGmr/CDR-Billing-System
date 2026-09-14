@@ -26,7 +26,7 @@ export const Extensions: React.FC = () => {
     employeeId: '',
     department: 'Airport Operations',
     location: 'Terminal 3 - Airside Ops',
-    telephoneNumber: '+91 11 2565 ',
+    telephoneNumber: '+30 21 0900 ',
     extensionType: 'SIP Phone' as const,
     monthlyCalls: 0,
     monthlyUsageHours: 0,
@@ -54,7 +54,7 @@ export const Extensions: React.FC = () => {
       employeeId: '',
       department: 'Airport Operations',
       location: 'Terminal 3 - Airside Ops',
-      telephoneNumber: '+91 11 2565 ',
+      telephoneNumber: '+30 21 0900 ',
       extensionType: 'SIP Phone',
       monthlyCalls: 0,
       monthlyUsageHours: 0,
@@ -90,7 +90,7 @@ export const Extensions: React.FC = () => {
       { key: 'telephoneNumber', label: 'Direct Line' },
       { key: 'extensionType', label: 'Type' },
       { key: 'monthlyUsageHours', label: 'Monthly Hours' },
-      { key: 'monthlyCost', label: 'Monthly Cost (₹)' },
+      { key: 'monthlyCost', label: 'Monthly Cost (€)' },
       { key: 'status', label: 'Status' },
     ]);
   };
@@ -118,7 +118,7 @@ export const Extensions: React.FC = () => {
           >
             <option value="ALL">All Departments</option>
             <option value="Airport Operations">Airport Operations</option>
-            <option value="Security & CISF">Security & CISF</option>
+            <option value="Security & Compliance">Security & Compliance</option>
             <option value="Engineering & Maint">Engineering & Maint</option>
             <option value="Customer Service">Customer Service</option>
             <option value="Cargo Operations">Cargo Operations</option>
@@ -289,7 +289,7 @@ export const Extensions: React.FC = () => {
                 className="w-full px-3 py-2 border border-input rounded-md text-xs bg-background focus:ring-1 focus:ring-sky-500 focus:outline-none"
               >
                 <option value="Airport Operations">Airport Operations</option>
-                <option value="Security & CISF">Security & CISF</option>
+                <option value="Security & Compliance">Security & Compliance</option>
                 <option value="Engineering & Maint">Engineering & Maint</option>
                 <option value="Customer Service">Customer Service</option>
                 <option value="Cargo Operations">Cargo Operations</option>

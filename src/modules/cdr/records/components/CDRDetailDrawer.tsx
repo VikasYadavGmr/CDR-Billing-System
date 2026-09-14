@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { Badge } from '../../../../components/common/Badge';
 import { Drawer } from '../../../../components/common/Drawer';
-import { formatCurrency } from '../../../../utils/billingCalculator';
+import { formatCurrency, formatRate } from '../../../../utils/billingCalculator';
+import { TAX_STATUS_LABELS } from '../../../../utils/taxEngine';
 import type { ComprehensiveCDRRecord } from '../types';
 
 interface CDRDetailDrawerProps {
@@ -95,7 +96,7 @@ export const CDRDetailDrawer: React.FC<CDRDetailDrawerProps> = ({
               type="button"
               onClick={() =>
                 handleCopy(
-                  `CDR: ${record.cdrId}\nDate: ${record.dateTime}\nCaller: ${record.userName} (${record.extension})\nDestination: ${record.destinationName} (${record.destinationNumber})\nDuration: ${record.durationFormatted}\nAmount: INR ${record.totalAmount.toFixed(2)}`,
+                  `CDR: ${record.cdrId}\nDate: ${record.dateTime}\nCaller: ${record.userName} (${record.extension})\nDestination: ${record.destinationName} (${record.destinationNumber})\nDuration: ${record.durationFormatted}\nAmount: EUR ${record.totalAmount.toFixed(2)}`,
                   'details'
                 )
               }
@@ -313,7 +314,7 @@ export const CDRDetailDrawer: React.FC<CDRDetailDrawerProps> = ({
             <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
               <span className="text-[10px] uppercase font-bold text-slate-400 block">Rate / Min</span>
               <span className="font-mono font-bold text-slate-800 block mt-0.5">
-                {record.ratePerMinute > 0 ? `₹${record.ratePerMinute.toFixed(2)}` : '₹0.00'}
+                {record.ratePerMinute > 0 ? `€${record.ratePerMinute.toFixed(2)}` : '€0.00'}
               </span>
             </div>
             <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
@@ -323,7 +324,9 @@ export const CDRDetailDrawer: React.FC<CDRDetailDrawerProps> = ({
               </span>
             </div>
             <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">GST 18%</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                {record.taxName ? `${record.taxName} ${formatRate(record.taxRate)}` : 'Tax'}
+              </span>
               <span className="font-mono font-bold text-slate-800 block mt-0.5">
                 {formatCurrency(record.taxAmount)}
               </span>
@@ -332,6 +335,55 @@ export const CDRDetailDrawer: React.FC<CDRDetailDrawerProps> = ({
               <span className="text-[10px] uppercase font-bold opacity-80 block">Total Amount</span>
               <span className="font-mono font-extrabold text-sm block mt-0.5">
                 {formatCurrency(record.totalAmount)}
+              </span>
+            </div>
+          </div>
+
+          {/* Tax jurisdiction — resolved from the Tax & VAT master */}
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                Billing Country
+              </span>
+              <span className="font-semibold text-slate-800 block mt-0.5 truncate">
+                {record.billingCountry}{' '}
+                <span className="font-mono text-slate-400">({record.billingCountryCode})</span>
+              </span>
+            </div>
+            <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Tax Type</span>
+              <span className="font-semibold text-slate-800 block mt-0.5">
+                {record.taxType ?? '—'}
+              </span>
+            </div>
+            <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Tax Rule</span>
+              <span className="font-mono font-semibold text-slate-800 block mt-0.5 truncate">
+                {record.taxRuleId ?? '—'}
+              </span>
+            </div>
+            <div className="bg-white/90 p-2.5 rounded-xl border border-teal-200/60">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                Taxable Amount
+              </span>
+              <span className="font-mono font-bold text-slate-800 block mt-0.5">
+                {formatCurrency(record.taxableAmount)}
+              </span>
+            </div>
+            <div
+              className={`p-2.5 rounded-xl border ${
+                record.taxStatus === 'TAX_REVIEW_REQUIRED'
+                  ? 'bg-rose-50 border-rose-200'
+                  : 'bg-white/90 border-teal-200/60'
+              }`}
+            >
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Tax Status</span>
+              <span
+                className={`font-semibold block mt-0.5 ${
+                  record.taxStatus === 'TAX_REVIEW_REQUIRED' ? 'text-rose-700' : 'text-slate-800'
+                }`}
+              >
+                {TAX_STATUS_LABELS[record.taxStatus]}
               </span>
             </div>
           </div>

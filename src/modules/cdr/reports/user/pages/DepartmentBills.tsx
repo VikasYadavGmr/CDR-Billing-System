@@ -56,11 +56,11 @@ export const DepartmentBills: React.FC = () => {
     { key: 'department', label: 'Department', sortable: true },
     { key: 'users', label: 'Users', sortable: true, align: 'right' as const },
     { key: 'extensions', label: 'Extensions', sortable: true, align: 'right' as const },
-    { key: 'totalCalls', label: 'Total Calls', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.totalCalls.toLocaleString('en-IN') },
-    { key: 'incoming', label: 'Incoming', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.incoming.toLocaleString('en-IN') },
-    { key: 'outgoing', label: 'Outgoing', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.outgoing.toLocaleString('en-IN') },
-    { key: 'totalDurationMin', label: 'Total Duration', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => `${r.totalDurationMin.toLocaleString('en-IN')} min` },
-    { key: 'billableCalls', label: 'Billable Calls', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.billableCalls.toLocaleString('en-IN') },
+    { key: 'totalCalls', label: 'Total Calls', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.totalCalls.toLocaleString('en-IE') },
+    { key: 'incoming', label: 'Incoming', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.incoming.toLocaleString('en-IE') },
+    { key: 'outgoing', label: 'Outgoing', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.outgoing.toLocaleString('en-IE') },
+    { key: 'totalDurationMin', label: 'Total Duration', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => `${r.totalDurationMin.toLocaleString('en-IE')} min` },
+    { key: 'billableCalls', label: 'Billable Calls', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => r.billableCalls.toLocaleString('en-IE') },
     { key: 'baseCost', label: 'Base Cost', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => formatCurrency(r.baseCost, false) },
     { key: 'tax', label: 'Tax', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => formatCurrency(r.tax, false) },
     { key: 'totalCost', label: 'Total Cost', sortable: true, align: 'right' as const, render: (r: DepartmentBillRow) => <span className="font-bold">{formatCurrency(r.totalCost, false)}</span> },
@@ -112,9 +112,9 @@ export const DepartmentBills: React.FC = () => {
         columns="grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
         items={[
           { label: 'Total Departments', value: departmentBillSummary.totalDepartments, icon: Building2 },
-          { label: 'Total Calls', value: departmentBillSummary.totalCalls.toLocaleString('en-IN'), icon: PhoneCall },
-          { label: 'Total Duration', value: `${departmentBillSummary.totalDurationMinutes.toLocaleString('en-IN')} min`, icon: Clock3 },
-          { label: 'Total Billable Calls', value: departmentBillSummary.totalBillableCalls.toLocaleString('en-IN'), icon: Users },
+          { label: 'Total Calls', value: departmentBillSummary.totalCalls.toLocaleString('en-IE'), icon: PhoneCall },
+          { label: 'Total Duration', value: `${departmentBillSummary.totalDurationMinutes.toLocaleString('en-IE')} min`, icon: Clock3 },
+          { label: 'Total Billable Calls', value: departmentBillSummary.totalBillableCalls.toLocaleString('en-IE'), icon: Users },
           { label: 'Total Cost', value: formatCurrency(departmentBillSummary.totalCost, false), icon: Receipt },
         ]}
       />
@@ -150,8 +150,8 @@ export const DepartmentBills: React.FC = () => {
                 formatter={(value) => {
                   const n = Number(value ?? 0);
                   if (metric === 'cost') return [formatCurrency(n, false), 'Cost'];
-                  if (metric === 'duration') return [`${n.toLocaleString('en-IN')} min`, 'Duration'];
-                  return [n.toLocaleString('en-IN'), 'Calls'];
+                  if (metric === 'duration') return [`${n.toLocaleString('en-IE')} min`, 'Duration'];
+                  return [n.toLocaleString('en-IE'), 'Calls'];
                 }}
               />
               <Bar dataKey={metric} fill="#0d9488" radius={[0, 4, 4, 0]} />

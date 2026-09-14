@@ -46,7 +46,7 @@ export interface IndividualBillSummary {
   billableCalls: number;
   totalTalkTime: string;
   subtotal: number;
-  gst: number;
+  vat: number;
   totalAmount: number;
 }
 
@@ -72,7 +72,7 @@ export interface UserDailyConsumption {
   totalDurationFormatted: string;
   billableMinutes: number;
   baseCharge: number;
-  gst: number;
+  vat: number;
   totalCost: number;
   avgQoSScore: number;
 }

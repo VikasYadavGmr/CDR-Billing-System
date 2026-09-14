@@ -14,7 +14,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { Badge } from '../../../../components/common/Badge';
-import { formatCurrency } from '../../../../utils/billingCalculator';
+import { formatCurrency, formatRate } from '../../../../utils/billingCalculator';
+import { TAX_STATUS_LABELS } from '../../../../utils/taxEngine';
 import { exportToCSV } from '../../../../utils/exportUtils';
 import type { ComprehensiveCDRRecord } from '../types';
 
@@ -109,7 +110,16 @@ export const CDRRecordsTable: React.FC<CDRRecordsTableProps> = ({
         'Destination Number': r.destinationNumber,
         'Call Type': r.callType,
         Duration: r.durationFormatted,
-        'Total (INR)': r.totalAmount.toFixed(2),
+        'Billing Country': r.billingCountry,
+        'Billing Country Code': r.billingCountryCode,
+        'Tax Rule': r.taxRuleId ?? '',
+        'Tax Type': r.taxType ?? '',
+        'Tax Name': r.taxName ?? '',
+        'Tax Rate (%)': r.taxRate,
+        'Taxable Amount (EUR)': r.taxableAmount.toFixed(2),
+        'Tax Amount (EUR)': r.taxAmount.toFixed(2),
+        'Total (EUR)': r.totalAmount.toFixed(2),
+        'Tax Status': r.taxStatus,
         Status: r.status,
       })),
       `CDR_Records_Export_${fmt}`
@@ -284,6 +294,7 @@ export const CDRRecordsTable: React.FC<CDRRecordsTableProps> = ({
               </th>
               <th className="py-2.5 px-3">Destination</th>
               <th className="py-2.5 px-3">Call Type</th>
+              <th className="py-2.5 px-3">Billing Country</th>
               <th
                 className="py-2.5 px-3 text-right cursor-pointer hover:text-teal-700 select-none"
                 onClick={() => handleSort('durationSeconds')}
@@ -376,6 +387,21 @@ export const CDRRecordsTable: React.FC<CDRRecordsTableProps> = ({
                       {row.callType}
                     </span>
                   </td>
+                  <td className="py-2.5 px-3">
+                    <span className="font-mono font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200 text-[10.5px]">
+                      {row.billingCountryCode}
+                    </span>
+                    <span
+                      className={`block text-[10px] mt-0.5 font-medium ${
+                        row.taxStatus === 'TAX_REVIEW_REQUIRED' ? 'text-rose-600' : 'text-slate-400'
+                      }`}
+                      title={TAX_STATUS_LABELS[row.taxStatus]}
+                    >
+                      {row.taxRate > 0
+                        ? `${row.taxType} ${formatRate(row.taxRate)}`
+                        : TAX_STATUS_LABELS[row.taxStatus]}
+                    </span>
+                  </td>
                   <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-800">
                     <div className="flex items-center justify-end gap-1">
                       {isLongDuration && (
@@ -389,7 +415,7 @@ export const CDRRecordsTable: React.FC<CDRRecordsTableProps> = ({
                   <td className="py-2.5 px-3 text-right font-mono font-bold text-teal-800">
                     <div className="flex items-center justify-end gap-1">
                       {isHighBilling && (
-                        <span title="High billing call (>₹50)">
+                        <span title="High billing call (>€50)">
                           <Coins className="w-3 h-3 text-amber-600" />
                         </span>
                       )}

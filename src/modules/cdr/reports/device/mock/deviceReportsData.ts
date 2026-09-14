@@ -75,7 +75,7 @@ export const deviceStatusDist: DeviceStatusDistItem[] = [
 export const deviceUsageList: DeviceUsageRow[] = [
   { id: 'dev-1', deviceId: 'DEV-IP-1024', deviceName: 'Airport Operations Phone', deviceType: 'IP Phone', extension: 'EXT-1024', department: 'Airport Operations', location: 'Terminal 1 — Operations Office', totalCalls: 428, totalDuration: '31h 42m', totalDurationMinutes: 1902, billing: 18420, lastActivity: '11 Sep 2026, 09:42', deviceStatus: 'Active', ipAddress: '10.20.14.102', macAddress: '00:1A:2B:3C:4D:5E', model: 'Cisco CP-8841 IP Phone' },
   { id: 'dev-2', deviceId: 'DEV-IP-1048', deviceName: 'Airside Duty Desk Phone', deviceType: 'IP Phone', extension: 'EXT-1048', department: 'Airport Operations', location: 'Terminal 3 — Airside Dispatch', totalCalls: 395, totalDuration: '28h 15m', totalDurationMinutes: 1695, billing: 16200, lastActivity: '11 Sep 2026, 09:38', deviceStatus: 'Active', ipAddress: '10.20.14.104', macAddress: '00:1A:2B:3C:4D:6F', model: 'Cisco CP-8841 IP Phone' },
-  { id: 'dev-3', deviceId: 'DEV-IP-2014', deviceName: 'CISF Security Control Desk', deviceType: 'IP Phone', extension: 'EXT-2014', department: 'Security', location: 'Terminal 2 — Security Wing', totalCalls: 380, totalDuration: '26h 50m', totalDurationMinutes: 1610, billing: 12900, lastActivity: '11 Sep 2026, 09:45', deviceStatus: 'Active', ipAddress: '10.20.15.110', macAddress: '00:1A:2B:3C:4D:7A', model: 'Cisco CP-8861 IP Phone' },
+  { id: 'dev-3', deviceId: 'DEV-IP-2014', deviceName: 'Corporate Security Security Control Desk', deviceType: 'IP Phone', extension: 'EXT-2014', department: 'Security', location: 'Terminal 2 — Security Wing', totalCalls: 380, totalDuration: '26h 50m', totalDurationMinutes: 1610, billing: 12900, lastActivity: '11 Sep 2026, 09:45', deviceStatus: 'Active', ipAddress: '10.20.15.110', macAddress: '00:1A:2B:3C:4D:7A', model: 'Cisco CP-8861 IP Phone' },
   { id: 'dev-4', deviceId: 'DEV-IP-3050', deviceName: 'Information Helpdesk Central', deviceType: 'IP Phone', extension: 'EXT-3050', department: 'Passenger Services', location: 'Terminal 1 — Concourse A', totalCalls: 362, totalDuration: '25h 10m', totalDurationMinutes: 1510, billing: 14800, lastActivity: '11 Sep 2026, 09:40', deviceStatus: 'Active', ipAddress: '10.20.16.120', macAddress: '00:1A:2B:3C:4D:8B', model: 'Cisco CP-7841 IP Phone' },
   { id: 'dev-5', deviceId: 'DEV-IP-2231', deviceName: 'Terminal 1 Security Main', deviceType: 'IP Phone', extension: 'EXT-2231', department: 'Security', location: 'Terminal 1 — Checkpoint North', totalCalls: 345, totalDuration: '23h 40m', totalDurationMinutes: 1420, billing: 11800, lastActivity: '11 Sep 2026, 09:28', deviceStatus: 'Active', ipAddress: '10.20.15.115', macAddress: '00:1A:2B:3C:4D:9C', model: 'Cisco CP-8841 IP Phone' },
   { id: 'dev-6', deviceId: 'DEV-IP-2451', deviceName: 'Operations Lead Station', deviceType: 'IP Phone', extension: 'EXT-2451', department: 'Airport Operations', location: 'Terminal 3 — Command Center', totalCalls: 330, totalDuration: '22h 15m', totalDurationMinutes: 1335, billing: 13600, lastActivity: '11 Sep 2026, 09:35', deviceStatus: 'Active', ipAddress: '10.20.14.108', macAddress: '00:1A:2B:3C:4D:A1', model: 'Cisco CP-8865 Video IP Phone' },
@@ -127,7 +127,7 @@ export const departmentDeviceUsage: DepartmentDeviceUsageRow[] = [
 export const topDevicesByVolume: TopDeviceVolumeRow[] = [
   { rank: 1, device: 'DEV-IP-1024 (Airport Operations Phone)', extension: 'EXT-1024', department: 'Airport Operations', calls: 428, duration: '31h 42m', billing: 18420 },
   { rank: 2, device: 'DEV-IP-1048 (Airside Duty Desk Phone)', extension: 'EXT-1048', department: 'Airport Operations', calls: 395, duration: '28h 15m', billing: 16200 },
-  { rank: 3, device: 'DEV-IP-2014 (CISF Security Control Desk)', extension: 'EXT-2014', department: 'Security', calls: 380, duration: '26h 50m', billing: 12900 },
+  { rank: 3, device: 'DEV-IP-2014 (Corporate Security Security Control Desk)', extension: 'EXT-2014', department: 'Security', calls: 380, duration: '26h 50m', billing: 12900 },
   { rank: 4, device: 'DEV-IP-3050 (Information Helpdesk Central)', extension: 'EXT-3050', department: 'Passenger Services', calls: 362, duration: '25h 10m', billing: 14800 },
   { rank: 5, device: 'DEV-IP-2231 (Terminal 1 Security Main)', extension: 'EXT-2231', department: 'Security', calls: 345, duration: '23h 40m', billing: 11800 },
   { rank: 6, device: 'DEV-IP-2451 (Operations Lead Station)', extension: 'EXT-2451', department: 'Airport Operations', calls: 330, duration: '22h 15m', billing: 13600 },
@@ -142,7 +142,7 @@ export const topDevicesByBilling: TopDeviceBillingRow[] = [
   { rank: 2, device: 'DEV-IP-1048 (Airside Duty Desk Phone)', extension: 'EXT-1048', department: 'Airport Operations', calls: 395, duration: '28h 15m', billing: 16200 },
   { rank: 3, device: 'DEV-IP-3050 (Information Helpdesk Central)', extension: 'EXT-3050', department: 'Passenger Services', calls: 362, duration: '25h 10m', billing: 14800 },
   { rank: 4, device: 'DEV-IP-2451 (Operations Lead Station)', extension: 'EXT-2451', department: 'Airport Operations', calls: 330, duration: '22h 15m', billing: 13600 },
-  { rank: 5, device: 'DEV-IP-2014 (CISF Security Control Desk)', extension: 'EXT-2014', department: 'Security', calls: 380, duration: '26h 50m', billing: 12900 },
+  { rank: 5, device: 'DEV-IP-2014 (Corporate Security Security Control Desk)', extension: 'EXT-2014', department: 'Security', calls: 380, duration: '26h 50m', billing: 12900 },
   { rank: 6, device: 'DEV-IP-2231 (Terminal 1 Security Main)', extension: 'EXT-2231', department: 'Security', calls: 345, duration: '23h 40m', billing: 11800 },
   { rank: 7, device: 'DEV-DIG-4010 (HVAC Maintenance Desk)', extension: 'EXT-4010', department: 'Engineering', calls: 310, duration: '20h 50m', billing: 10400 },
   { rank: 8, device: 'DEV-IP-2458 (Network Operations Telecom)', extension: 'EXT-2458', department: 'IT', calls: 295, duration: '19h 30m', billing: 9800 },
@@ -220,12 +220,12 @@ export function getSingleDeviceDetail(device: DeviceUsageRow): SingleDeviceDetai
       qualityIssueRate: 2.8,
     },
     callHistory: [
-      { id: 'ch-d1', dateTime: '11 Sep 2026, 09:42', cdrId: 'CDR-20260911-001', extension: device.extension, destination: '011-45678901', callType: 'External', duration: '04:32', tariff: '₹1.20/min', amount: 5.44, status: 'Completed' },
-      { id: 'ch-d2', dateTime: '11 Sep 2026, 09:15', cdrId: 'CDR-20260911-002', extension: device.extension, destination: '9876543210', callType: 'External', duration: '06:10', tariff: '₹1.20/min', amount: 7.4, status: 'Completed' },
-      { id: 'ch-d3', dateTime: '11 Sep 2026, 08:50', cdrId: 'CDR-20260911-003', extension: device.extension, destination: 'EXT-2451', callType: 'Internal', duration: '02:45', tariff: '₹0.00/min', amount: 0, status: 'Completed' },
-      { id: 'ch-d4', dateTime: '10 Sep 2026, 17:30', cdrId: 'CDR-20260910-044', extension: device.extension, destination: '+442079460912', callType: 'International', duration: '05:12', tariff: '₹8.00/min', amount: 41.6, status: 'Completed' },
-      { id: 'ch-d5', dateTime: '10 Sep 2026, 15:10', cdrId: 'CDR-20260910-045', extension: device.extension, destination: '02226543210', callType: 'External', duration: '08:20', tariff: '₹1.50/min', amount: 12.5, status: 'Completed' },
-      { id: 'ch-d6', dateTime: '10 Sep 2026, 11:40', cdrId: 'CDR-20260910-046', extension: device.extension, destination: '9810012345', callType: 'External', duration: '00:00', tariff: '₹1.20/min', amount: 0, status: 'Failed' },
+      { id: 'ch-d1', dateTime: '11 Sep 2026, 09:42', cdrId: 'CDR-20260911-001', extension: device.extension, destination: '011-45678901', callType: 'External', duration: '04:32', tariff: '€1.20/min', amount: 5.44, status: 'Completed' },
+      { id: 'ch-d2', dateTime: '11 Sep 2026, 09:15', cdrId: 'CDR-20260911-002', extension: device.extension, destination: '9876543210', callType: 'External', duration: '06:10', tariff: '€1.20/min', amount: 7.4, status: 'Completed' },
+      { id: 'ch-d3', dateTime: '11 Sep 2026, 08:50', cdrId: 'CDR-20260911-003', extension: device.extension, destination: 'EXT-2451', callType: 'Internal', duration: '02:45', tariff: '€0.00/min', amount: 0, status: 'Completed' },
+      { id: 'ch-d4', dateTime: '10 Sep 2026, 17:30', cdrId: 'CDR-20260910-044', extension: device.extension, destination: '+442079460912', callType: 'International', duration: '05:12', tariff: '€8.00/min', amount: 41.6, status: 'Completed' },
+      { id: 'ch-d5', dateTime: '10 Sep 2026, 15:10', cdrId: 'CDR-20260910-045', extension: device.extension, destination: '02226543210', callType: 'External', duration: '08:20', tariff: '€1.50/min', amount: 12.5, status: 'Completed' },
+      { id: 'ch-d6', dateTime: '10 Sep 2026, 11:40', cdrId: 'CDR-20260910-046', extension: device.extension, destination: '9810012345', callType: 'External', duration: '00:00', tariff: '€1.20/min', amount: 0, status: 'Failed' },
     ],
   };
 }

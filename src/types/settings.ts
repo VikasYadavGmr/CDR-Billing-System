@@ -4,7 +4,7 @@ export interface SystemSettings {
   currency: string;
   currencySymbol: string;
   timeZone: string;
-  defaultTaxRate: number; // e.g. 18 for GST
+  defaultTaxRate: number; // e.g. 18 for VAT
   billingCycleDay: number; // e.g. 1
   gracePeriodDays: number;
   roundingRule: 'CeilToMinute' | 'ActualSeconds' | 'CeilTo30Seconds';

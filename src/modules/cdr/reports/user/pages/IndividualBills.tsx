@@ -20,7 +20,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Badge } from '../../../../../components/common/Badge';
-import { formatCurrency } from '../../../../../utils/billingCalculator';
+import { formatCurrency, formatRate } from '../../../../../utils/billingCalculator';
 import { CallDetailsDrawer } from '../components/CallDetailsDrawer';
 import { ExportReportButton } from '../components/ExportReportButton';
 import { ReportTable } from '../components/ReportTable';
@@ -28,6 +28,7 @@ import {
   individualBillInfo,
   individualBillRows,
   individualBillSummaries,
+  individualBillTaxRule,
   reportCallTypes,
   reportDepartments,
   reportDirections,
@@ -100,7 +101,7 @@ export const IndividualBills: React.FC = () => {
     const billableCalls = dailyConsumptions.reduce((acc, d) => acc + d.billableCalls, 0);
     const totalMinutes = dailyConsumptions.reduce((acc, d) => acc + d.billableMinutes, 0);
     const subtotal = dailyConsumptions.reduce((acc, d) => acc + d.baseCharge, 0);
-    const gst = dailyConsumptions.reduce((acc, d) => acc + d.gst, 0);
+    const vat = dailyConsumptions.reduce((acc, d) => acc + d.vat, 0);
     const totalAmount = dailyConsumptions.reduce((acc, d) => acc + d.totalCost, 0);
 
     const hours = Math.floor(totalMinutes / 60);
@@ -115,7 +116,7 @@ export const IndividualBills: React.FC = () => {
       billableCalls,
       totalTalkTime,
       subtotal: Number(subtotal.toFixed(2)),
-      gst: Number(gst.toFixed(2)),
+      vat: Number(vat.toFixed(2)),
       totalAmount: Number(totalAmount.toFixed(2)),
     };
   }, [dailyConsumptions, defaultSummary]);
@@ -259,21 +260,21 @@ export const IndividualBills: React.FC = () => {
     },
     {
       key: 'baseCharge',
-      label: 'Tariff Base (₹)',
+      label: 'Tariff Base (€)',
       sortable: true,
       align: 'right',
       render: (row) => <span className="font-mono text-slate-700">{formatCurrency(row.baseCharge)}</span>,
     },
     {
-      key: 'gst',
-      label: 'GST 18% (₹)',
+      key: 'vat',
+      label: `VAT ${individualBillTaxRule ? formatRate(individualBillTaxRule.rate) : ''} (€)`.replace('  ', ' '),
       sortable: true,
       align: 'right',
-      render: (row) => <span className="font-mono text-slate-500">{formatCurrency(row.gst)}</span>,
+      render: (row) => <span className="font-mono text-slate-500">{formatCurrency(row.vat)}</span>,
     },
     {
       key: 'totalCost',
-      label: 'Daily Total (₹)',
+      label: 'Daily Total (€)',
       sortable: true,
       align: 'right',
       render: (row) => (
@@ -451,7 +452,7 @@ export const IndividualBills: React.FC = () => {
                 { key: 'billableCalls', label: 'Billable Calls' },
                 { key: 'totalDurationFormatted', label: 'Duration' },
                 { key: 'baseCharge', label: 'Base Charge' },
-                { key: 'gst', label: 'GST' },
+                { key: 'vat', label: 'VAT' },
                 { key: 'totalCost', label: 'Total Amount' },
               ]}
               printElementId="individual-bill-content"
@@ -754,10 +755,12 @@ export const IndividualBills: React.FC = () => {
 
           <div className="bg-white border border-slate-200/90 rounded-xl p-3 shadow-xs">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-400">GST (18%)</p>
+              <p className="text-[10px] uppercase font-bold text-slate-400">
+                VAT {individualBillTaxRule ? `(${formatRate(individualBillTaxRule.rate)})` : ''}
+              </p>
               <CreditCard className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <p className="text-xs font-mono font-bold text-slate-800 mt-1">{formatCurrency(dynamicSummary.gst)}</p>
+            <p className="text-xs font-mono font-bold text-slate-800 mt-1">{formatCurrency(dynamicSummary.vat)}</p>
           </div>
 
           <div className="bg-teal-50/70 border border-teal-200 rounded-xl p-3 shadow-xs">

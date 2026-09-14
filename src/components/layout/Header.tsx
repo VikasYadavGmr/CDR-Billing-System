@@ -24,7 +24,19 @@ const routeTitles: Record<string, { title: string; subtitle: string }> = {
   },
   '/billing': {
     title: 'Billing & Invoices Management',
-    subtitle: 'Monthly billing cycles, individual user statements, departmental bills, and GST tax invoices',
+    subtitle: 'Monthly billing cycles, individual user statements, departmental bills, and VAT tax invoices',
+  },
+  '/tax': {
+    title: 'Tax & VAT Master',
+    subtitle: 'Country Master and country-wise VAT rules applied by the CDR billing engine',
+  },
+  '/tax/reports': {
+    title: 'Tax & VAT Reports',
+    subtitle: 'Tax summary, country-wise tax, tax rate, and tax audit reporting',
+  },
+  '/audit-logs': {
+    title: 'Audit Logs',
+    subtitle: 'Configuration and tax master change history across the billing system',
   },
   '/reports': {
     title: 'CDR Reports & Telecom Analytics',
@@ -62,7 +74,7 @@ export const Header: React.FC = () => {
     const updateTime = () => {
       const now = new Date();
       setDateTimeStr(
-        now.toLocaleString('en-IN', {
+        now.toLocaleString('en-IE', {
           weekday: 'short',
           day: '2-digit',
           month: 'short',
@@ -143,7 +155,7 @@ export const Header: React.FC = () => {
               <div className="space-y-2">
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                   <p className="font-semibold text-slate-900">Billing Cycle Ready</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">August 2026 rating generated: ₹4,86,240.</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">August 2026 rating generated: €95,438.31 incl. VAT.</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
                   <p className="font-semibold text-slate-900">High Usage Alert</p>
@@ -168,7 +180,9 @@ export const Header: React.FC = () => {
             </div>
             <div className="text-left hidden lg:block">
               <p className="text-xs font-semibold text-slate-900 leading-tight">{user?.name || 'Admin Officer'}</p>
-              <p className="text-[10px] text-teal-700 font-medium leading-tight">Telecom Admin</p>
+              <p className="text-[10px] text-teal-700 font-medium leading-tight">
+                {user ? `${user.role} • ${user.region}` : 'Telecom Admin'}
+              </p>
             </div>
           </button>
 
@@ -176,7 +190,12 @@ export const Header: React.FC = () => {
             <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/60 rounded-t-xl">
                 <p className="text-xs font-bold text-slate-900">{user?.name || 'Administrator'}</p>
-                <p className="text-[11px] text-slate-500">telecom.admin@airport.org</p>
+                <p className="text-[11px] text-slate-500">telecom.admin@hts-group.gr</p>
+                {user && (
+                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                    {user.region} • {user.billingCountryCode} • {user.currency}
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => {

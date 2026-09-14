@@ -514,7 +514,7 @@ export const DeviceReportsPage: React.FC = () => {
                     <th className="py-2 px-3">Device & Extension</th>
                     <th className="py-2 px-3">Department</th>
                     <th className="py-2 px-3 text-right">Calls</th>
-                    <th className="py-2 px-3 text-right">Billing (₹)</th>
+                    <th className="py-2 px-3 text-right">Billing (€)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -561,7 +561,7 @@ export const DeviceReportsPage: React.FC = () => {
                     <th className="py-2 px-3">Device & Extension</th>
                     <th className="py-2 px-3">Department</th>
                     <th className="py-2 px-3 text-right">Duration</th>
-                    <th className="py-2 px-3 text-right">Billing (₹)</th>
+                    <th className="py-2 px-3 text-right">Billing (€)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

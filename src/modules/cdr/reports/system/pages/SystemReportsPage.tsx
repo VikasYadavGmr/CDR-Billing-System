@@ -180,7 +180,7 @@ export const SystemReportsPage: React.FC = () => {
     },
     {
       key: 'billing',
-      label: 'Billing (₹)',
+      label: 'Billing (€)',
       sortable: true,
       align: 'right',
       render: (row) => (
@@ -470,7 +470,7 @@ export const SystemReportsPage: React.FC = () => {
                     <th className="py-2.5 px-3">Department</th>
                     <th className="py-2.5 px-3 text-right">Calls Processed</th>
                     <th className="py-2.5 px-3 text-right">Duration</th>
-                    <th className="py-2.5 px-3 text-right">Billing (₹)</th>
+                    <th className="py-2.5 px-3 text-right">Billing (€)</th>
                     <th className="py-2.5 px-3 text-right">Share (%)</th>
                   </tr>
                 </thead>
@@ -556,7 +556,7 @@ export const SystemReportsPage: React.FC = () => {
                     <th className="py-2.5 px-3">Department</th>
                     <th className="py-2.5 px-3 text-right">Calls</th>
                     <th className="py-2.5 px-3 text-right">Duration</th>
-                    <th className="py-2.5 px-3 text-right">Total Billing (₹)</th>
+                    <th className="py-2.5 px-3 text-right">Total Billing (€)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

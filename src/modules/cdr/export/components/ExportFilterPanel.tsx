@@ -309,19 +309,19 @@ export const ExportFilterPanel: React.FC<ExportFilterPanelProps> = ({
             {mainTab === 'cdr' && (
               <div className="space-y-1">
                 <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                  Billing Range (₹ INR)
+                  Billing Range (€ EUR)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
                     type="number"
-                    placeholder="Min ₹"
+                    placeholder="Min €"
                     value={filters.minAmount || ''}
                     onChange={(e) => onFilterChange({ ...filters, minAmount: e.target.value })}
                     className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono"
                   />
                   <input
                     type="number"
-                    placeholder="Max ₹"
+                    placeholder="Max €"
                     value={filters.maxAmount || ''}
                     onChange={(e) => onFilterChange({ ...filters, maxAmount: e.target.value })}
                     className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono"

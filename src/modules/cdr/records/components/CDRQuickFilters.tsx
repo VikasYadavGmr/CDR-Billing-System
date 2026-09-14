@@ -40,7 +40,7 @@ export const CDRQuickFilters: React.FC<CDRQuickFiltersProps> = ({
     { id: 'international', label: 'International', icon: Globe2 },
     { id: 'completed', label: 'Completed', icon: CheckCircle2 },
     { id: 'failed', label: 'Failed / Busy', icon: AlertTriangle },
-    { id: 'high-billing', label: 'High Billing (>₹50)', icon: Coins },
+    { id: 'high-billing', label: 'High Billing (>€50)', icon: Coins },
     { id: 'long-duration', label: 'Long Duration (>30m)', icon: Clock },
   ];
 

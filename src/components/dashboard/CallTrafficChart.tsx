@@ -26,7 +26,7 @@ const metricConfig: Record<
 > = {
   calls: { label: 'Calls', dataKey: 'calls', color: '#0ea5e9', unit: 'calls' },
   duration: { label: 'Duration', dataKey: 'duration', color: '#14b8a6', unit: 'min' },
-  cost: { label: 'Cost', dataKey: 'cost', color: '#0284c7', unit: '₹' },
+  cost: { label: 'Cost', dataKey: 'cost', color: '#0284c7', unit: '€' },
 };
 
 export const CallTrafficChart: React.FC<CallTrafficChartProps> = ({
@@ -76,8 +76,8 @@ export const CallTrafficChart: React.FC<CallTrafficChartProps> = ({
             <Tooltip
               formatter={(value) => {
                 const n = Number(value ?? 0);
-                if (metric === 'cost') return [`₹${n.toLocaleString('en-IN')}`, cfg.label];
-                return [`${n.toLocaleString('en-IN')} ${cfg.unit}`, cfg.label];
+                if (metric === 'cost') return [`€${n.toLocaleString('en-IE')}`, cfg.label];
+                return [`${n.toLocaleString('en-IE')} ${cfg.unit}`, cfg.label];
               }}
               contentStyle={{
                 backgroundColor: '#ffffff',

@@ -123,12 +123,12 @@ export const DeviceCharts: React.FC<DeviceChartsProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 leading-tight">Device Billing Trend</h3>
-              <p className="text-[11px] text-slate-500">PSTN & International charges in INR</p>
+              <p className="text-[11px] text-slate-500">PSTN & International charges in EUR</p>
             </div>
           </div>
 
           <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[10.5px] font-bold border border-teal-200">
-            INR (₹)
+            EUR (€)
           </span>
         </div>
 

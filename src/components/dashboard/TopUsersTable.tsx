@@ -100,7 +100,7 @@ export const TopUsersTable: React.FC<TopUsersTableProps> = ({ data, highlighted 
                   </span>
                 </td>
                 <td className="py-2.5 px-3 text-slate-600">{row.department}</td>
-                <td className="py-2.5 px-3 font-medium">{row.totalCalls.toLocaleString('en-IN')}</td>
+                <td className="py-2.5 px-3 font-medium">{row.totalCalls.toLocaleString('en-IE')}</td>
                 <td className="py-2.5 px-3 font-mono text-slate-600">{row.duration}</td>
                 <td className="py-2.5 px-3 font-bold text-slate-900">{formatCurrency(row.totalCost, false)}</td>
                 <td className="py-2.5 px-3">

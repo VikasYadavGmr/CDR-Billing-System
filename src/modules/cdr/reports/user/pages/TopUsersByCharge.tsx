@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { IndianRupee, TrendingUp, Users, Wallet } from 'lucide-react';
+import { Euro, TrendingUp, Users, Wallet } from 'lucide-react';
 import { formatCurrency } from '../../../../../utils/billingCalculator';
 import { ReportFilter } from '../components/ReportFilter';
 import { ReportSummaryCards } from '../components/ReportSummaryCards';
@@ -97,7 +97,7 @@ export const TopUsersByCharge: React.FC = () => {
         items={[
           { label: 'Highest User Cost', value: formatCurrency(topChargeSummary.highestUserCost, false), icon: TrendingUp },
           { label: 'Average User Cost', value: formatCurrency(topChargeSummary.averageUserCost, false), icon: Wallet },
-          { label: 'Total Cost', value: formatCurrency(topChargeSummary.totalCost, false), icon: IndianRupee },
+          { label: 'Total Cost', value: formatCurrency(topChargeSummary.totalCost, false), icon: Euro },
           { label: 'Total Billable Users', value: topChargeSummary.totalBillableUsers, icon: Users },
         ]}
       />

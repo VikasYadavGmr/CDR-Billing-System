@@ -10,6 +10,9 @@ import { Departments } from '../pages/departments/Departments';
 import { Billing } from '../pages/billing/Billing';
 import { RatePlans } from '../pages/rate-plans/RatePlans';
 import { Reports } from '../pages/reports/Reports';
+import { TaxVatMaster } from '../pages/tax/TaxVatMaster';
+import { TaxReports } from '../pages/tax/TaxReports';
+import { AuditLogs } from '../pages/audit/AuditLogs';
 import { UsersPage } from '../pages/users/Users';
 import { SettingsPage } from '../pages/settings/Settings';
 
@@ -55,6 +58,11 @@ export const AppRoutes: React.FC = () => {
         <Route path="departments" element={<Departments />} />
         <Route path="billing" element={<Billing />} />
         <Route path="rate-plans" element={<RatePlans />} />
+
+        {/* Tax & VAT */}
+        <Route path="tax" element={<TaxVatMaster />} />
+        <Route path="tax/reports" element={<TaxReports />} />
+        <Route path="audit-logs" element={<AuditLogs />} />
         
         {/* Reports & Billing Navigation */}
         <Route path="reports" element={<Reports />} />
@@ -68,6 +76,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="reports/user/top-by-cost" element={<TopUsersByCost />} />
         <Route path="reports/user/top-by-duration" element={<TopUsersByDuration />} />
         <Route path="reports/user/top-by-calls" element={<TopUsersByCalls />} />
+        <Route path="reports/tax" element={<TaxReports />} />
 
         <Route path="users" element={<UsersPage />} />
         <Route path="settings" element={<SettingsPage />} />

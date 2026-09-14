@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { BillingPeriod } from '../../types/billing';
+import { billingService } from '../../services/billingService';
+import { taxService } from '../../services/taxService';
+import { formatCurrency } from '../../utils/billingCalculator';
 import {
+  Percent,
   PhoneCall,
   Clock3,
   Receipt,
@@ -43,33 +48,33 @@ const dailyCallVolumeData = [
 
 // 2. Department-wise Usage (Operations, Security, Engineering, IT, Finance, HR, Admin, Customer Service)
 const departmentUsageData = [
-  { department: 'Airport Operations', calls: 6420, billing: 142800, durationHours: 1040 },
-  { department: 'Security / CISF', calls: 5180, billing: 118500, durationHours: 890 },
-  { department: 'Engineering', calls: 3840, billing: 84200, durationHours: 620 },
-  { department: 'IT & Telecom', calls: 2950, billing: 52300, durationHours: 410 },
-  { department: 'Customer Service', calls: 2480, billing: 38400, durationHours: 350 },
-  { department: 'Finance & Accounts', calls: 1720, billing: 24600, durationHours: 230 },
-  { department: 'Administration', calls: 1340, billing: 16400, durationHours: 180 },
-  { department: 'HR & Training', calls: 926, billing: 9040, durationHours: 122 },
+  { department: 'Network Operations', calls: 6420, billing: 19420, durationHours: 1040 },
+  { department: 'Security & Compliance', calls: 5180, billing: 15180, durationHours: 890 },
+  { department: 'Engineering', calls: 3840, billing: 11040, durationHours: 620 },
+  { department: 'IT & Telecom', calls: 2950, billing: 6480, durationHours: 410 },
+  { department: 'Customer Service', calls: 2480, billing: 9615, durationHours: 350 },
+  { department: 'Finance & Accounts', calls: 1720, billing: 3545, durationHours: 230 },
+  { department: 'Administration', calls: 1340, billing: 4930, durationHours: 180 },
+  { department: 'Field Operations', calls: 926, billing: 8260, durationHours: 122 },
 ];
 
 // 3. Call Type Distribution (Internal, Local, STD, ISD, Mobile)
 const callTypeDistributionData = [
-  { name: 'Internal (Intercom)', value: 6431, cost: '₹0.00', color: '#0d9488', rate: 'Free' },
-  { name: 'Local (PSTN)', value: 7850, cost: '₹1,25,600', color: '#0284c7', rate: '₹0.80/m' },
-  { name: 'Mobile', value: 5420, cost: '₹1,43,088', color: '#6366f1', rate: '₹1.20/m' },
-  { name: 'STD (National)', value: 3840, cost: '₹1,26,720', color: '#f59e0b', rate: '₹1.50/m' },
-  { name: 'ISD (International)', value: 1315, cost: '₹90,832', color: '#f43f5e', rate: '₹8.00/m' },
+  { name: 'Internal (Intercom)', value: 6431, cost: '€0.00', color: '#0d9488', rate: 'Free' },
+  { name: 'Local (PSTN)', value: 7850, cost: '€18,840', color: '#0284c7', rate: '€0.03/m' },
+  { name: 'Mobile', value: 5420, cost: '€21,480', color: '#6366f1', rate: '€0.12/m' },
+  { name: 'STD (National)', value: 3840, cost: '€23,040', color: '#f59e0b', rate: '€0.06/m' },
+  { name: 'ISD (International)', value: 1315, cost: '€14,612', color: '#f43f5e', rate: '€0.45/m' },
 ];
 
 // 4. Monthly Billing Trend (Last 6 months)
 const monthlyBillingTrendData = [
-  { month: 'Mar 2026', billing: 412000, calls: 21400, talkTime: 3250 },
-  { month: 'Apr 2026', billing: 435000, calls: 22800, talkTime: 3410 },
-  { month: 'May 2026', billing: 448000, calls: 23200, talkTime: 3540 },
-  { month: 'Jun 2026', billing: 465000, calls: 24100, talkTime: 3680 },
-  { month: 'Jul 2026', billing: 472000, calls: 24400, talkTime: 3750 },
-  { month: 'Aug 2026', billing: 486240, calls: 24856, talkTime: 3842 },
+  { month: 'Mar 2026', billing: 81400, calls: 21400, talkTime: 3250 },
+  { month: 'Apr 2026', billing: 85100, calls: 22800, talkTime: 3410 },
+  { month: 'May 2026', billing: 88300, calls: 23200, talkTime: 3540 },
+  { month: 'Jun 2026', billing: 91200, calls: 24100, talkTime: 3680 },
+  { month: 'Jul 2026', billing: 92000, calls: 24400, talkTime: 3750 },
+  { month: 'Aug 2026', billing: 95438, calls: 24856, talkTime: 3842 },
 ];
 
 // 5. High Usage Analysis Table
@@ -81,17 +86,17 @@ const highUsageExtensions = [
     terminal: 'Operations Control Center (OCC)',
     calls: 842,
     duration: '46 hrs 15m',
-    cost: '₹12,420',
+    cost: '€1,842',
     exceeded: true,
   },
   {
     extension: '3187',
     user: 'Amit Kumar (Control Room)',
-    department: 'Security / CISF',
+    department: 'Security & Compliance',
     terminal: 'Terminal 3 - Airside',
     calls: 764,
     duration: '39 hrs 40m',
-    cost: '₹10,850',
+    cost: '€1,610',
     exceeded: true,
   },
   {
@@ -101,7 +106,7 @@ const highUsageExtensions = [
     terminal: 'Admin Building 2F',
     calls: 621,
     duration: '34 hrs 10m',
-    cost: '₹9,420',
+    cost: '€1,395',
     exceeded: false,
   },
   {
@@ -111,7 +116,7 @@ const highUsageExtensions = [
     terminal: 'Terminal 2 - Arrivals',
     calls: 589,
     duration: '28 hrs 50m',
-    cost: '₹8,150',
+    cost: '€1,208',
     exceeded: false,
   },
   {
@@ -121,7 +126,7 @@ const highUsageExtensions = [
     terminal: 'Cargo Terminal Bay 4',
     calls: 452,
     duration: '22 hrs 35m',
-    cost: '₹6,890',
+    cost: '€1,022',
     exceeded: false,
   },
 ];
@@ -130,6 +135,29 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState('Aug 2026');
   const [deptChartType, setDeptChartType] = useState<'billing' | 'calls'>('billing');
+  const [currentPeriod, setCurrentPeriod] = useState<BillingPeriod | null>(null);
+  const [taxStats, setTaxStats] = useState({ countries: 0, activeRules: 0 });
+  const [exemptAmount, setExemptAmount] = useState(0);
+
+  useEffect(() => {
+    const load = async () => {
+      const [periods, rules, summary] = await Promise.all([
+        billingService.getBillingPeriods(),
+        taxService.getTaxRules(),
+        billingService.getBillingPeriods().then((p) =>
+          p.length ? billingService.getTaxSummary(p[0].periodCode) : null
+        ),
+      ]);
+      setCurrentPeriod(periods[0] ?? null);
+      const activeRules = rules.filter((r) => r.status === 'Active');
+      setTaxStats({
+        countries: new Set(activeRules.map((r) => r.isoCode)).size,
+        activeRules: activeRules.length,
+      });
+      setExemptAmount(summary?.exemptAmount ?? 0);
+    };
+    load();
+  }, []);
 
   const handleExportSummary = () => {
     exportToCSV(
@@ -138,7 +166,7 @@ export const Dashboard: React.FC = () => {
       [
         { key: 'department', label: 'Department' },
         { key: 'calls', label: 'Total Calls' },
-        { key: 'billing', label: 'Billing Amount (₹)' },
+        { key: 'billing', label: 'Billing Amount (€)' },
         { key: 'durationHours', label: 'Duration (Hours)' },
       ]
     );
@@ -236,8 +264,12 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-2.5">
-            <h3 className="text-2xl font-bold text-teal-700 tracking-tight">₹4,86,240</h3>
-            <p className="text-[11px] text-slate-500 mt-1 font-medium">Incl. 18% GST (₹74,172)</p>
+            <h3 className="text-2xl font-bold text-teal-700 tracking-tight">
+              {formatCurrency(currentPeriod?.totalAmount ?? 0, false)}
+            </h3>
+            <p className="text-[11px] text-slate-500 mt-1 font-medium">
+              Incl. VAT ({formatCurrency(currentPeriod?.taxAmount ?? 0, false)})
+            </p>
           </div>
         </div>
 
@@ -265,7 +297,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="mt-2.5">
             <h3 className="text-2xl font-bold text-slate-900 tracking-tight">6,431</h3>
-            <p className="text-[11px] text-slate-500 mt-1 font-medium">Free Intercom (₹0.00)</p>
+            <p className="text-[11px] text-slate-500 mt-1 font-medium">Free Intercom (€0.00)</p>
           </div>
         </div>
 
@@ -281,6 +313,73 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-2xl font-bold text-slate-900 tracking-tight">18,425</h3>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">Local / STD / ISD / Mobile</p>
           </div>
+        </div>
+      </div>
+
+      {/* Tax & VAT Overview — figures come from the configured tax master */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+              <Percent className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Tax &amp; VAT Overview</h3>
+              <p className="text-xs text-slate-500">
+                {currentPeriod?.period ?? 'Current cycle'} • rates resolved from the Tax &amp; VAT master
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/tax')}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shadow-xs self-start sm:self-auto"
+          >
+            <span>Manage Tax Rules</span>
+            <ArrowUpRight className="w-3.5 h-3.5 text-teal-600" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          {[
+            {
+              label: 'Taxable Amount',
+              value: formatCurrency(currentPeriod?.subtotal ?? 0, false),
+              tone: 'text-slate-900',
+            },
+            {
+              label: 'VAT Collected',
+              value: formatCurrency(currentPeriod?.taxAmount ?? 0, false),
+              tone: 'text-teal-700',
+            },
+            {
+              label: 'Tax-Exempt Amount',
+              value: formatCurrency(exemptAmount, false),
+              tone: 'text-indigo-700',
+            },
+            {
+              label: 'Countries Configured',
+              value: String(taxStats.countries),
+              tone: 'text-slate-900',
+            },
+            {
+              label: 'Active Tax Rules',
+              value: String(taxStats.activeRules),
+              tone: 'text-slate-900',
+            },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="p-3 rounded-xl bg-slate-50 border border-slate-200/80"
+            >
+              <span className="text-[10.5px] font-semibold text-slate-500 uppercase tracking-wider block">
+                {item.label}
+              </span>
+              <span className={`text-lg font-bold tracking-tight mt-1 block ${item.tone}`}>
+                {item.value}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -399,7 +498,7 @@ export const Dashboard: React.FC = () => {
                   deptChartType === 'billing' ? 'bg-white text-teal-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Cost (₹)
+                Cost (€)
               </button>
               <button
                 onClick={() => setDeptChartType('calls')}
@@ -425,7 +524,7 @@ export const Dashboard: React.FC = () => {
                   tickLine={false}
                   axisLine={false}
                   tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickFormatter={(val) => (deptChartType === 'billing' ? `₹${val / 1000}k` : `${val}`)}
+                  tickFormatter={(val) => (deptChartType === 'billing' ? `€${val / 1000}k` : `${val}`)}
                 />
                 <YAxis
                   dataKey="department"
@@ -443,7 +542,7 @@ export const Dashboard: React.FC = () => {
                     fontSize: '12px',
                   }}
                   formatter={(val: any) => [
-                    deptChartType === 'billing' ? `₹${Number(val).toLocaleString()}` : `${Number(val).toLocaleString()} calls`,
+                    deptChartType === 'billing' ? `€${Number(val).toLocaleString()}` : `${Number(val).toLocaleString()} calls`,
                     deptChartType === 'billing' ? 'Monthly Cost' : 'Calls',
                   ]}
                 />
@@ -486,7 +585,7 @@ export const Dashboard: React.FC = () => {
                   tickLine={false}
                   axisLine={false}
                   tick={{ fill: '#64748b', fontSize: 11 }}
-                  tickFormatter={(val) => `₹${val / 1000}k`}
+                  tickFormatter={(val) => `€${val / 1000}k`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -495,7 +594,7 @@ export const Dashboard: React.FC = () => {
                     border: '1px solid #e2e8f0',
                     fontSize: '12px',
                   }}
-                  formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Billing Total']}
+                  formatter={(val: any) => [`€${Number(val).toLocaleString()}`, 'Billing Total']}
                 />
                 <Area
                   type="monotone"

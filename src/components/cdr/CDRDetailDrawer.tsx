@@ -2,7 +2,7 @@ import React from 'react';
 import type { CDRRecord } from '../../types/cdr';
 import { Drawer } from '../common/Drawer';
 import { Badge } from '../common/Badge';
-import { formatCurrency } from '../../utils/billingCalculator';
+import { formatCurrency, formatRate } from '../../utils/billingCalculator';
 import { printElement } from '../../utils/exportUtils';
 import {
   PhoneCall,
@@ -167,7 +167,9 @@ export const CDRDetailDrawer: React.FC<CDRDetailDrawerProps> = ({
               <span className="font-mono font-semibold text-foreground">{formatCurrency(record.callCost)}</span>
             </div>
             <div className="flex justify-between py-1 border-b border-border/50">
-              <span className="text-muted-foreground">GST (18%)</span>
+              <span className="text-muted-foreground">
+                VAT{record.callCost > 0 ? ` (${formatRate((record.taxAmount / record.callCost) * 100)})` : ''}
+              </span>
               <span className="font-mono font-semibold text-foreground">{formatCurrency(record.taxAmount)}</span>
             </div>
             <div className="flex justify-between py-2 text-sm font-bold bg-slate-50 px-2 rounded-lg">

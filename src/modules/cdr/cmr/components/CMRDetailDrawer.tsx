@@ -445,7 +445,7 @@ export const CMRDetailDrawer: React.FC<CMRDetailDrawerProps> = ({
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-400 block">Billed Amount</span>
               <span className="font-mono font-bold text-teal-800 block mt-0.5">
-                {record.relatedCdrSummary ? formatCurrency(record.relatedCdrSummary.amount) : '₹0.00'}
+                {record.relatedCdrSummary ? formatCurrency(record.relatedCdrSummary.amount) : '€0.00'}
               </span>
             </div>
           </div>

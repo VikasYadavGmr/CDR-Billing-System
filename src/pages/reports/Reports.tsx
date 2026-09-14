@@ -8,6 +8,7 @@ import {
   FileText,
   HardDrive,
   LayoutGrid,
+  Percent,
   PhoneCall,
   Printer,
   Server,
@@ -25,7 +26,7 @@ import { formatCurrency } from '../../utils/billingCalculator';
 import { mockCDRRecords, mockDeptUsageData, mockHighUsageExtensions } from '../../mock-data/cdrData';
 import { mockExtensions } from '../../mock-data/extensionData';
 
-type ReportCategory = 'all' | 'user' | 'system' | 'device' | 'export' | 'standard';
+type ReportCategory = 'all' | 'user' | 'system' | 'device' | 'tax' | 'export' | 'standard';
 
 type ReportMainTab =
   | 'hub'
@@ -90,7 +91,7 @@ export const Reports: React.FC = () => {
       icon: Coins,
       badge: 'Expenditure',
       desc: 'Rankings of highest telecom spending staff and departments with billable call ratios and talk-time correlation.',
-      metric: '₹8,450.20 Top User',
+      metric: '€8,450.20 Top User',
       route: '/reports/user/top-by-cost',
     },
     {
@@ -140,6 +141,19 @@ export const Reports: React.FC = () => {
       desc: 'Telephone device-level performance, Cisco IP phone model utilization, location load, and hardware health.',
       metric: '280 IP Phones Active',
       route: '/reports/device',
+    },
+
+    // Tax & VAT
+    {
+      id: 'tax-reports' as ReportMainTab,
+      category: 'tax',
+      title: 'Tax & VAT Reports',
+      categoryLabel: 'Taxation',
+      icon: Percent,
+      badge: 'VAT',
+      desc: 'Tax summary, country-wise tax, configured tax rates, and the tax rule audit trail for European VAT.',
+      metric: '4 Tax Reports',
+      route: '/tax/reports',
     },
 
     // Export Tool
@@ -251,6 +265,7 @@ export const Reports: React.FC = () => {
                 { id: 'user', label: 'User Analytics (4)' },
                 { id: 'system', label: 'System Traffic (1)' },
                 { id: 'device', label: 'Hardware (1)' },
+                { id: 'tax', label: 'Tax & VAT (1)' },
                 { id: 'export', label: 'Export Tool (1)' },
                 { id: 'standard', label: 'Standard Logs (1)' },
               ].map((cat) => {
@@ -462,7 +477,7 @@ export const Reports: React.FC = () => {
                           <th className="py-2.5 px-3">Department</th>
                           <th className="py-2.5 px-3 text-right">Total Calls</th>
                           <th className="py-2.5 px-3 text-right">Duration (hrs)</th>
-                          <th className="py-2.5 px-3 text-right">Total Cost (₹)</th>
+                          <th className="py-2.5 px-3 text-right">Total Cost (€)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 font-mono">
@@ -489,7 +504,7 @@ export const Reports: React.FC = () => {
                           <th className="py-2.5 px-3">Department</th>
                           <th className="py-2.5 px-3 text-right">Monthly Calls</th>
                           <th className="py-2.5 px-3 text-right">Usage (hrs)</th>
-                          <th className="py-2.5 px-3 text-right">Cost (₹)</th>
+                          <th className="py-2.5 px-3 text-right">Cost (€)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 font-mono">
@@ -518,7 +533,7 @@ export const Reports: React.FC = () => {
                           <th className="py-2.5 px-3">Called</th>
                           <th className="py-2.5 px-3">Call Type</th>
                           <th className="py-2.5 px-3 text-right">Duration</th>
-                          <th className="py-2.5 px-3 text-right">Amount (₹)</th>
+                          <th className="py-2.5 px-3 text-right">Amount (€)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 font-mono">

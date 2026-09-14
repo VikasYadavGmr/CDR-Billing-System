@@ -1,4 +1,5 @@
 import type { CallType } from './cdr';
+import type { CountryTaxSummary, TaxStatus, TaxSummaryLine } from './tax';
 
 export type InvoiceStatus = 'Draft' | 'Generated' | 'Approved' | 'Paid';
 
@@ -12,6 +13,11 @@ export interface BillingPeriod {
   billableCalls: number;
   totalDurationHours: number;
   subtotal: number;
+  /**
+   * Blended effective tax rate for the period. Present for at-a-glance display
+   * only — the authoritative breakdown is `taxLines`, since one invoice can span
+   * several countries and rate categories.
+   */
   taxRatePercent: number;
   taxAmount: number;
   totalAmount: number;
@@ -19,6 +25,18 @@ export interface BillingPeriod {
   generatedDate: string;
   dueDate: string;
   invoiceNumber: string;
+
+  /** Primary tax jurisdiction of the billing entity for this cycle. */
+  billingCountry: string;
+  billingCountryCode: string;
+  /** Per tax-type/rate breakdown backing the invoice tax summary. */
+  taxLines: TaxSummaryLine[];
+  /** Per-country rollup used by country-wise billing and reports. */
+  countryBreakdown: CountryTaxSummary[];
+  /** Worst tax status across the period's transactions. */
+  taxStatus: TaxStatus;
+  /** Charges that could not be taxed and await review. */
+  reviewRequiredAmount: number;
 }
 
 export interface RatePlanItem {

@@ -72,7 +72,7 @@ export const DepartmentUsageChart: React.FC<DepartmentUsageChartProps> = ({
               tickLine={false}
               tick={{ fontSize: 11, fill: '#64748b' }}
               tickFormatter={(val) =>
-                metric === 'cost' ? `₹${(val / 1000).toFixed(1)}k` : Number(val).toLocaleString('en-IN')
+                metric === 'cost' ? `€${(val / 1000).toFixed(1)}k` : Number(val).toLocaleString('en-IE')
               }
             />
             <YAxis
@@ -88,8 +88,8 @@ export const DepartmentUsageChart: React.FC<DepartmentUsageChartProps> = ({
               formatter={(value) => {
                 const n = Number(value ?? 0);
                 if (metric === 'cost') return [formatCurrency(n, false), 'Total Cost'];
-                if (metric === 'duration') return [`${n.toLocaleString('en-IN')} min`, 'Duration'];
-                return [n.toLocaleString('en-IN'), 'Calls'];
+                if (metric === 'duration') return [`${n.toLocaleString('en-IE')} min`, 'Duration'];
+                return [n.toLocaleString('en-IE'), 'Calls'];
               }}
               contentStyle={{
                 backgroundColor: '#ffffff',

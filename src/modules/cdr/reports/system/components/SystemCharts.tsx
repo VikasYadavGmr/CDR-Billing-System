@@ -162,12 +162,12 @@ export const SystemCharts: React.FC<SystemChartsProps> = ({
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 leading-tight">System Billing Trend</h3>
-                <p className="text-[11px] text-slate-500">External PSTN & International Carrier Telecom Expenditure (INR)</p>
+                <p className="text-[11px] text-slate-500">External PSTN & International Carrier Telecom Expenditure (EUR)</p>
               </div>
             </div>
 
             <span className="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200">
-              Currency: INR (₹)
+              Currency: EUR (€)
             </span>
           </div>
 
@@ -177,11 +177,11 @@ export const SystemCharts: React.FC<SystemChartsProps> = ({
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1.5 font-medium">
                   <span className="w-2.5 h-2.5 rounded-sm bg-sky-600 inline-block" />
-                  External (₹)
+                  External (€)
                 </span>
                 <span className="flex items-center gap-1.5 font-medium">
                   <span className="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block" />
-                  International (₹)
+                  International (€)
                 </span>
               </div>
             </div>
@@ -281,7 +281,7 @@ export const SystemCharts: React.FC<SystemChartsProps> = ({
                 <div className="flex justify-between text-[10.5px] text-slate-500">
                   <span>Billing Amount:</span>
                   <span className="font-mono font-bold text-slate-800">
-                    {item.billingAmount > 0 ? formatCurrency(item.billingAmount) : '₹0.00 (Free)'}
+                    {item.billingAmount > 0 ? formatCurrency(item.billingAmount) : '€0.00 (Free)'}
                   </span>
                 </div>
               </div>
