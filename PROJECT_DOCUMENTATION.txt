@@ -1,0 +1,1538 @@
+================================================================================
+  CDR BILLING SYSTEM — FRONTEND PROJECT DOCUMENTATION
+  Project: cdr-frontend
+  Generated: September 2026
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+  1. Project Overview
+  2. Purpose & Domain
+  3. Tech Stack
+  4. How to Run the Project
+  5. Application Architecture
+  6. Folder Structure
+  7. Application Flow (End-to-End)
+  8. Authentication
+  9. Routing Map
+ 10. FEATURES & FUNCTIONALITIES (DETAILED)
+ 11. Feature Modules (Pages) — Technical Map
+ 12. CDR Module (Detailed)
+ 13. Services Layer (Data Access)
+ 14. Mock Data Strategy
+ 15. Types & Domain Models
+ 16. Utilities
+ 17. Shared UI Components
+ 18. Layout System
+ 19. Styling & Theming
+ 20. Charts & Visualization
+ 21. Export & Print
+ 22. Billing Calculations
+ 23. Current Limitations & Backend Readiness
+ 24. Quick Reference — Key Files
+
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+This is a React + TypeScript frontend application for an Airport Telephone
+CDR (Call Detail Record) Billing System. It provides a complete telecom
+accounting console for managing:
+
+  - Call Detail Records (CDR)
+  - Call Management / Quality Records (CMR)
+  - Extensions (SIP/Analog/IP phones)
+  - Departments (cost centers)
+  - Billing cycles & GST invoices
+  - Rate plans / tariffs
+  - User analytics & telecom reports
+  - Device / hardware reports
+  - System / trunk traffic reports
+  - Data export (CSV / Excel / PDF workflows)
+
+The application is currently a DEMO / PROTOTYPE frontend. It uses in-memory
+mock data and simulated async services. It is structured so that mock services
+can later be replaced with real Node.js / Express (or other) API calls.
+
+
+================================================================================
+2. PURPOSE & DOMAIN
+================================================================================
+
+Domain context: Airport telecommunications network accounting.
+
+Typical use cases:
+  - Track multi-department telephone extensions across airport terminals
+  - Analyze incoming/outgoing trunk traffic (PRI / SIP)
+  - Audit Local, Mobile, STD, and ISD usage
+  - Calculate per-minute call costs with pulse billing and GST (18%)
+  - Generate monthly invoices and department / individual bills
+  - Monitor call quality (CMR: jitter, latency, packet loss)
+  - Export filtered CDR/CMR archives for audit and compliance
+
+Brand name in UI: "CDR Billing System" / "Telecom Analytics"
+
+
+================================================================================
+3. TECH STACK
+================================================================================
+
+Runtime / Framework:
+  - React 19
+  - TypeScript
+  - Vite 8 (build tool & dev server)
+
+Routing:
+  - react-router-dom v7 (BrowserRouter)
+
+Styling:
+  - Tailwind CSS v4 (via @tailwindcss/vite)
+  - PostCSS / Autoprefixer
+  - clsx + tailwind-merge (className helper: cn())
+
+UI / Icons / Charts:
+  - lucide-react (icons)
+  - recharts (bar, pie, area charts)
+
+Date helpers:
+  - date-fns
+
+Linting:
+  - oxlint
+
+NO backend HTTP client (axios/fetch API layer) is wired yet.
+NO state management library (Redux/Zustand) — uses React Context + local state.
+
+
+================================================================================
+4. HOW TO RUN THE PROJECT
+================================================================================
+
+Prerequisites:
+  - Node.js installed
+  - npm available
+
+Commands (from project root: cdr-frontend):
+
+  npm install          Install dependencies
+  npm run dev          Start Vite development server (hot reload)
+  npm run build        Type-check (tsc -b) + production build to /dist
+  npm run preview      Preview the production build
+  npm run lint         Run oxlint
+
+Default demo login:
+  Username: admin
+  Password: admin123
+
+
+================================================================================
+5. APPLICATION ARCHITECTURE
+================================================================================
+
+High-level layers:
+
+  index.html
+      └── src/main.tsx
+            └── App.tsx
+                  ├── BrowserRouter
+                  └── AuthProvider (AuthContext)
+                        └── AppRoutes
+                              ├── /login  → Login page (public)
+                              └── /*      → ProtectedRoute → MainLayout
+                                    ├── Sidebar
+                                    ├── Header
+                                    └── <Outlet />  (page content)
+
+Data flow pattern:
+
+  Page / Module Component
+        │
+        ▼
+  Service layer (src/services/*)
+        │  (async Promise with setTimeout to simulate API)
+        ▼
+  Mock data (src/mock-data/*  OR  module-local mock/)
+        │
+        ▼
+  Typed models (src/types/*  OR  module-local types/)
+        │
+        ▼
+  UI render (tables, charts, drawers, modals)
+
+Newer CDR features live under a modular structure:
+
+  src/modules/cdr/
+    ├── records/     Full CDR browser
+    ├── cmr/         Call quality / CMR records
+    ├── export/      Export CDR/CMR tool
+    └── reports/     User / System / Device reports
+
+
+================================================================================
+6. FOLDER STRUCTURE
+================================================================================
+
+cdr-frontend/
+├── index.html                 HTML entry; mounts #root
+├── package.json               Dependencies & scripts
+├── vite.config.ts             Vite + React + Tailwind plugins
+├── tailwind.config.js         Tailwind config
+├── postcss.config.js          PostCSS config
+├── tsconfig*.json             TypeScript configs
+├── .oxlintrc.json             Oxlint rules
+├── public/                    Static assets (favicon, icons)
+├── dist/                      Production build output
+└── src/
+    ├── main.tsx               React root render
+    ├── App.tsx                Router + Auth wrapper
+    ├── index.css              Global Tailwind + CSS variables
+    ├── App.css                Extra app styles (if any)
+    │
+    ├── assets/                Images (login background, logos)
+    │
+    ├── context/
+    │   └── AuthContext.tsx    Auth state, login/logout, localStorage
+    │
+    ├── routes/
+    │   └── AppRoutes.tsx      All route definitions + ProtectedRoute
+    │
+    ├── pages/                 Top-level route pages
+    │   ├── auth/Login.tsx
+    │   ├── dashboard/Dashboard.tsx
+    │   ├── cdr/CDRRecords.tsx          (thin wrapper → modules/cdr/records)
+    │   ├── extensions/Extensions.tsx
+    │   ├── departments/Departments.tsx
+    │   ├── billing/Billing.tsx
+    │   ├── rate-plans/RatePlans.tsx
+    │   ├── reports/Reports.tsx         (reports hub)
+    │   ├── users/Users.tsx
+    │   └── settings/Settings.tsx
+    │
+    ├── modules/cdr/           Feature modules for CDR domain
+    │   ├── records/           CDR list, filters, detail drawer
+    │   ├── cmr/               CMR quality records UI
+    │   ├── export/            Export wizard (filters → preview → download)
+    │   └── reports/
+    │       ├── user/          Call history, top users, bills
+    │       ├── system/        Trunk/traffic/system health
+    │       └── device/        Device inventory & performance
+    │
+    ├── components/
+    │   ├── layout/            MainLayout, Sidebar, Header
+    │   ├── common/            Badge, Modal, Drawer, DataTable, StatCard, etc.
+    │   ├── dashboard/         Dashboard chart/table widgets
+    │   ├── billing/           GenerateBillModal, InvoiceModal
+    │   └── cdr/               Older shared CDR components
+    │
+    ├── services/              Async data access (mock-backed)
+    │   ├── cdrService.ts
+    │   ├── billingService.ts
+    │   ├── extensionService.ts
+    │   ├── departmentService.ts
+    │   ├── userService.ts
+    │   └── settingsService.ts
+    │
+    ├── mock-data/             Shared mock datasets
+    │   ├── cdrData.ts
+    │   ├── billingData.ts
+    │   ├── extensionData.ts
+    │   ├── departmentData.ts
+    │   ├── userData.ts
+    │   └── overviewData.ts
+    │
+    ├── types/                 Shared TypeScript interfaces
+    │   ├── cdr.ts
+    │   ├── billing.ts
+    │   ├── extension.ts
+    │   ├── department.ts
+    │   ├── user.ts
+    │   └── settings.ts
+    │
+    ├── utils/
+    │   ├── billingCalculator.ts   Cost, duration, currency helpers
+    │   └── exportUtils.ts         CSV download + print helpers
+    │
+    ├── lib/
+    │   └── utils.ts               cn() className merger
+    │
+    └── styles/                    Additional style folders (if present)
+
+
+================================================================================
+7. APPLICATION FLOW (END-TO-END)
+================================================================================
+
+1) User opens the app → Vite serves index.html → main.tsx boots React.
+
+2) App wraps everything in BrowserRouter + AuthProvider.
+
+3) AuthProvider checks localStorage key "aocc_auth":
+     - If "true" → user treated as logged in (Admin User)
+     - Else → unauthenticated
+
+4) AppRoutes decides:
+     - Not authenticated → redirect to /login
+     - Authenticated visiting /login → redirect to /dashboard
+     - Authenticated other routes → MainLayout with nested page
+
+5) MainLayout renders:
+     - Collapsible Sidebar (navigation)
+     - Sticky Header (page title, search, clock, notifications, profile)
+     - Main content area via React Router <Outlet />
+
+6) Each page loads data via services (or module-local mock) and renders
+   tables, KPIs, charts, filters, modals, and drawers.
+
+7) User actions (filter, generate bill, export CSV, edit rate, add user)
+   update local React state and/or mutate in-memory mock arrays.
+
+
+================================================================================
+8. AUTHENTICATION
+================================================================================
+
+File: src/context/AuthContext.tsx
+
+Mechanism:
+  - Simple client-side demo authentication
+  - Hardcoded credentials: admin / admin123
+  - On success: sets localStorage "aocc_auth" = "true"
+  - Stores user object: { name: "Admin User", username: "admin" }
+  - logout() clears localStorage and resets state
+
+ProtectedRoute (in AppRoutes.tsx):
+  - Reads isAuthenticated from useAuth()
+  - If false → <Navigate to="/login" />
+  - If true → renders children (MainLayout)
+
+Login page:
+  - Airport-themed split layout (hero + form)
+  - Validates credentials via AuthContext.login()
+  - On success navigates to /dashboard
+
+NOTE: This is NOT production-grade security. There is no JWT, no server
+session, and credentials are hardcoded for demo purposes only.
+
+
+================================================================================
+9. ROUTING MAP
+================================================================================
+
+Public:
+  /login                         Login page
+
+Protected (inside MainLayout):
+  /                              → redirects to /dashboard
+  /dashboard                     Operations dashboard
+  /cdr                           CDR Records (module page)
+  /extensions                    Extensions directory
+  /departments                   Department cost centers
+  /billing                       Billing & invoices
+  /rate-plans                    Tariffs & rate plans
+  /reports                       Reports hub
+  /reports/billing               Alias to Billing page
+  /reports/export                Export CDR/CMR page
+  /export                        Same export page (shortcut)
+  /reports/device                Device reports
+  /reports/system                System / traffic reports
+  /reports/user/individual-bill  Individual user bills
+  /reports/user/call-history     User call history
+  /reports/user/top-by-cost      Top users by cost
+  /reports/user/top-by-duration  Top users by duration
+  /reports/user/top-by-calls     Top users by call count
+  /users                         User management
+  /settings                      System settings
+  /*                             Catch-all → /dashboard
+
+
+================================================================================
+10. FEATURES & FUNCTIONALITIES (DETAILED)
+================================================================================
+
+This section explains every major feature and what the user can do with it,
+in plain language.
+
+
+--------------------------------------------------------------------------------
+10.0 FEATURE SUMMARY MATRIX
+--------------------------------------------------------------------------------
+
+  Area                    | What it does                          | Key actions
+  ------------------------|---------------------------------------|---------------------------
+  Login & Access Control  | Secure entry to the console           | Sign in, remember me, logout
+  Shell / Navigation      | App chrome & global tools             | Menu, search, help, profile
+  Dashboard               | Executive telecom overview            | KPIs, charts, export, drill-down
+  CDR Records             | Full call log browser                 | Search, filter, select, detail
+  CMR Quality             | Voice / network quality analysis      | QoS filters, issues, summaries
+  Extensions              | Phone line inventory                  | Search, add, filter, export
+  Departments             | Cost-center usage & budgets           | Budget view, export, open CDRs
+  Billing & Invoices      | Monthly GST billing cycles            | Generate, view, export bills
+  Individual Bills        | Per-employee statements               | Filter user, daily/itemized view
+  Department Bills        | Per-department charge statements      | Compare cost centers
+  Rate Plans              | Call tariffs & pulse rules            | Edit rates, live cost calculator
+  Reports Hub             | Central analytics directory           | Open any report category
+  User Analytics Reports  | Rankings & call history               | Top cost/duration/calls
+  System Reports          | Trunk / PBX / traffic analytics       | Overview, dept, ext, daily
+  Device Reports          | IP phone / endpoint performance       | Usage, quality, inactive list
+  Export Tool             | Filtered CDR/CMR data extract         | Preview, CSV/XLS/PDF, history
+  Standard Reports        | Pre-built audit report formats        | Preview, print, CSV export
+  Users                   | Portal / staff account management     | Add, filter, activate/deactivate
+  Settings                | Org, billing & CDR system parameters  | Edit, save, reset defaults
+  Notifications           | In-header operational alerts          | View billing / high-usage alerts
+
+
+--------------------------------------------------------------------------------
+10.1 LOGIN & ACCESS CONTROL
+--------------------------------------------------------------------------------
+
+What it is:
+  Entry gate for the Telecom Portal. Only authenticated users reach the
+  operational console.
+
+Functionalities:
+  - Username / Employee ID + password sign-in form
+  - Show / hide password toggle
+  - Remember Me checkbox (UI)
+  - Forgot Password link (UI placeholder)
+  - Validation messages for empty or invalid credentials
+  - Demo credentials displayed for training / UAT use
+  - Airport-branded hero panel with network stats (PBX trunks, extensions,
+    daily volume)
+
+How it works:
+  On submit, AuthContext checks credentials. Success stores auth flag in
+  localStorage and routes to Dashboard. Failure shows an error banner.
+  Logout (sidebar or header) clears auth and returns to Login.
+
+Who uses it:
+  Telecom admins, billing managers, and other portal roles (role model
+  exists in Users; login itself is currently a single demo admin account).
+
+
+--------------------------------------------------------------------------------
+10.2 APPLICATION SHELL (SIDEBAR, HEADER, HELP)
+--------------------------------------------------------------------------------
+
+What it is:
+  Persistent layout around every protected page.
+
+Sidebar functionalities:
+  - Navigate to all main modules (Dashboard, CDR, Extensions, Departments,
+    Billing, Reports, Rate Plans, Users, Settings)
+  - Collapse / expand for more content width
+  - Live badge on CDR Records
+  - PBX Trunks Active status widget (PRI / SIP channel summary)
+  - Help & Guides modal explaining module purposes
+  - Logout
+
+Header functionalities:
+  - Dynamic page title + subtitle based on current route
+  - Global search box: searches extensions / CDR IDs / numbers and jumps
+    to CDR page with ?q= query
+  - Live clock in Indian locale (en-IN)
+  - Notifications panel (billing cycle ready, high usage alerts)
+  - Profile menu → Settings or Logout
+  - Displays logged-in user name and “Telecom Admin” role label
+
+Why it matters:
+  Operators can move across modules without losing context, and can jump
+  straight from a search into the CDR log.
+
+
+--------------------------------------------------------------------------------
+10.3 DASHBOARD — OPERATIONS OVERVIEW
+--------------------------------------------------------------------------------
+
+What it is:
+  The home screen for day-to-day telecom operations monitoring.
+
+Functionalities:
+  A) Period selector
+     - Today, Yesterday, Last 7 Days, or monthly billing cycles
+       (e.g. August 2026)
+
+  B) KPI summary cards (at a glance)
+     - Total Calls
+     - Total Talk Time
+     - Total Billing Amount
+     - Billable vs non-billable context
+     - Incoming / Outgoing / Internal / External style metrics
+     - Trend indicators vs previous period (e.g. +12.4%)
+
+  C) Charts & analytics
+     - Daily call volume by call type (Internal, Local, Mobile, STD, ISD)
+     - Department-wise usage (toggle billing amount vs call count)
+     - Call type distribution (pie) with cost and rate labels
+     - Monthly billing trend (last 6 months)
+
+  D) High Usage Analysis table
+     - Lists extensions with highest talk-time / cost
+     - Flags extensions that exceeded monthly limits
+     - Shows user, department, terminal location
+
+  E) Actions
+     - Export Summary (CSV of department usage)
+     - View All CDRs (navigate to CDR Records)
+
+Business value:
+  Management sees whether traffic and spend are healthy before drilling
+  into raw call logs or invoices.
+
+
+--------------------------------------------------------------------------------
+10.4 CDR RECORDS — CALL DETAIL RECORD BROWSER
+--------------------------------------------------------------------------------
+
+What it is:
+  The master call log. Every telephone call (or attempt) can be searched,
+  filtered, inspected, and selected for further action.
+
+Functionalities:
+  A) Summary KPIs for the filtered set
+     - Total records, completed, failed, total duration, total billing
+
+  B) Text search (multi-field)
+     Searches across: CDR ID, user name, extension, device ID,
+     destination name, destination number, department
+
+  C) Quick filters (one-click)
+     - All
+     - Internal
+     - External
+     - International
+     - Completed
+     - Failed
+     - High Billing (amount above threshold)
+     - Long Duration (long talk-time calls)
+
+  D) Advanced filters
+     - Date presets and custom from/to dates
+     - Time window (fromTime / toTime)
+     - Extension mode: all / single / multiple / range
+     - Department, Device
+     - Call type, Call status
+     - Min/max duration (seconds)
+     - Min/max amount (₹)
+
+  E) Records table
+     - Chronological call list with direction, parties, type, duration,
+       status, billing amount
+     - Row selection (single / multi / select all filtered)
+     - Open detail drawer
+
+  F) CDR Detail Drawer
+     - Full caller & destination metadata
+     - Device / location info
+     - Tariff, rate, cost, tax, total
+     - Disconnect reason / call status
+     - Related CMR quality summary when available
+       (score, packet loss, jitter, latency)
+
+  G) Reset filters
+     - One action restores default search + filter state
+
+Business value:
+  Audit any call, investigate high-cost destinations, or prepare filtered
+  sets for export / billing disputes.
+
+
+--------------------------------------------------------------------------------
+10.5 CMR — CALL QUALITY / MANAGEMENT RECORDS
+--------------------------------------------------------------------------------
+
+What it is:
+  Companion dataset to CDR focused on voice quality and network health
+  (not money). Useful for telecom engineers and helpdesk.
+
+Functionalities:
+  A) Quality KPIs
+     - Total CMR records
+     - Good / Fair / Poor counts
+     - Quality issues count
+     - Average quality score, jitter, packet loss
+
+  B) Quick filters
+     - Excellent / Good / Fair / Poor
+     - Quality issues
+     - High jitter / high packet loss / high latency
+
+  C) Advanced filters
+     - Date/time range
+     - Quality status & issue type
+     - Extension, department, device
+     - Min/max quality score
+
+  D) Multiple view tabs
+     - Records table
+     - Quality issues table
+     - Department quality summary
+     - Device quality summary
+     - Quality distribution
+
+  E) Detail drawer
+     - Codec / media stats
+     - Packet counts, RTT, latency, jitter
+     - Issue severity, recommended action
+     - Minute-by-minute QoS time series
+     - Link back to related CDR billing summary
+
+Business value:
+  Separate “expensive call” problems (billing) from “bad audio” problems
+  (network / device), and find which departments or phones cause issues.
+
+
+--------------------------------------------------------------------------------
+10.6 EXTENSIONS DIRECTORY
+--------------------------------------------------------------------------------
+
+What it is:
+  Inventory of airport telephone endpoints (SIP, analog, digital IP,
+  hot-line, wireless DECT).
+
+Functionalities:
+  - Search by extension number, employee name, location, telephone number
+  - Filter by department and status (Active / Inactive / Suspended)
+  - View monthly calls, usage hours, and cost per extension
+  - Add new extension via modal (employee, department, location, type)
+  - Export directory to CSV
+  - Status badges for operational state
+
+Business value:
+  Keep the mapping of people ↔ extensions ↔ cost centers accurate so
+  CDR billing attributes correctly.
+
+
+--------------------------------------------------------------------------------
+10.7 DEPARTMENTS — COST CENTERS & BUDGETS
+--------------------------------------------------------------------------------
+
+What it is:
+  Department-level telecom consumption and budget control.
+
+Functionalities:
+  - Card per department showing:
+      head of department, primary extension, location
+      total extensions, calls, talk time, billable calls
+      monthly cost vs budget allocation (progress %)
+  - Export department summary CSV
+  - “View CDRs” deep-link to CDR page filtered by department
+  - Active / Inactive status
+
+Business value:
+  Finance and HODs can see which divisions overspend telecom budget
+  and open the underlying call evidence.
+
+
+--------------------------------------------------------------------------------
+10.8 BILLING & INVOICES
+--------------------------------------------------------------------------------
+
+What it is:
+  Formal monthly billing workspace with GST-aware invoices.
+
+Main tabs:
+  1) Monthly Invoices
+  2) Individual User Bills
+  3) Department Bills
+
+----- Monthly Invoices functionalities -----
+  - KPI cards: current cycle total, YTD invoiced, GST collected,
+    pending settlement
+  - Table of billing periods with:
+      Invoice No., period, total/billable calls, duration,
+      subtotal, GST 18%, total, status, due date
+  - Status workflow badges: Draft → Generated → Approved → Paid
+  - Generate Monthly Bill (modal: period name + date range)
+  - View Invoice modal (invoice detail + department breakdown)
+  - Export invoices CSV
+
+----- Individual User Bills functionalities -----
+  - Select user / employee / extension
+  - Period presets (today, last 7/30 days, this/last month, custom)
+  - Filters: department, location, call type, direction
+  - View modes:
+      • Daily breakdown (consumption by day)
+      • Itemized calls (line-by-line call charges)
+  - Summary of charges / talk-time / call counts
+  - Open call details drawer
+  - Export statement
+
+----- Department Bills functionalities -----
+  - Aggregate charges by department cost center
+  - Compare talk-time and spend across divisions
+  - Support for billing audits and chargeback
+
+Business value:
+  Produces the documents Finance needs for settlement, and the detail
+  staff/managers need to dispute or understand charges.
+
+
+--------------------------------------------------------------------------------
+10.9 RATE PLANS & TARIFFS
+--------------------------------------------------------------------------------
+
+What it is:
+  Configuration of how much each minute of each call type costs.
+
+Functionalities:
+  - View active tariffs by call type
+      (Internal, Local, Mobile, STD, ISD, Toll-Free, etc.)
+  - Fields per plan: description, ₹/minute, pulse seconds,
+    effective date, Active/Inactive
+  - Edit rate plan via modal and save
+  - Live Billing Calculator:
+      pick call type + duration (min/sec)
+      → shows pulses, billable minutes, subtotal, GST, total
+  - Pulse billing explanation (default 60-second blocks)
+
+Business value:
+  Tariff changes are controlled in one place; calculator helps verify
+  expected charges before a billing cycle runs.
+
+
+--------------------------------------------------------------------------------
+10.10 REPORTS HUB
+--------------------------------------------------------------------------------
+
+What it is:
+  Central menu of all analytics products. Users can browse by category
+  or open a report directly.
+
+Functionalities:
+  - Category pills: All / User Analytics / System Traffic / Hardware /
+    Export Tool / Standard Logs
+  - Report cards with description + sample metric + “Open Report”
+  - In-page tab switcher OR navigation to dedicated routes
+  - Back to “All Reports Hub” when drilling in
+
+Report catalog included:
+  - User Call History
+  - Top Users by Cost
+  - Top Users by Duration
+  - Top Users by Call Count
+  - System & Traffic Reports
+  - Device & Hardware Reports
+  - Export CDR Records
+  - Standard Telecom Reports (6 pre-formatted formats)
+
+
+--------------------------------------------------------------------------------
+10.11 USER ANALYTICS REPORTS
+--------------------------------------------------------------------------------
+
+What they are:
+  People-centric views of who is calling, how long, and at what cost.
+
+A) User Call History
+   - Chronological list of an employee’s calls
+   - Shows termination causes, durations, routing, status
+   - Filters for period / department / type
+   - Call details drawer for deep inspection
+   - Export capability
+
+B) Top Users by Cost
+   - Ranking of highest-spending users/extensions
+   - Correlates spend with talk-time and billable ratio
+   - Useful for cost control and anomaly detection
+
+C) Top Users by Duration
+   - Ranking by cumulative talk-time
+   - Highlights long-running desks (ops, security, helpdesk)
+
+D) Top Users by Call Count
+   - Ranking by number of calls
+   - Highlights high-volume counters and dispatch desks
+
+Business value:
+  Answers “who should we talk to about telecom overuse?” quickly.
+
+
+--------------------------------------------------------------------------------
+10.12 SYSTEM & TRAFFIC REPORTS
+--------------------------------------------------------------------------------
+
+What it is:
+  Airport-wide PBX / trunk / traffic intelligence (system level, not
+  one person).
+
+Sub-tabs / views:
+  - Overview: KPIs, charts, health indicators, CMR quality summary
+  - Departments: department usage rows
+  - Extensions: extension usage rows
+  - Daily: day-by-day system summary
+
+Functionalities:
+  - Date / department filters
+  - Volume trends (daily / weekly / monthly)
+  - Peak usage metrics (busy hour style)
+  - Call type & call status distribution
+  - Top departments by billing / top extensions by usage
+  - System health + CMR quality snapshot
+  - Concurrent channel / trunk utilization context
+
+Business value:
+  Capacity planning for PRI/SIP trunks and detection of network-wide
+  traffic spikes.
+
+
+--------------------------------------------------------------------------------
+10.13 DEVICE & HARDWARE REPORTS
+--------------------------------------------------------------------------------
+
+What it is:
+  Endpoint-level reporting for Cisco IP phones and other devices.
+
+Sub-tabs:
+  - Usage
+  - Quality
+  - Departments
+  - Rankings
+  - Inactive devices
+
+Functionalities:
+  - Device inventory summary (active counts, models)
+  - Usage & billing trends by device
+  - Quality issue list (poor audio devices)
+  - Department device usage breakdown
+  - Top devices by volume / billing
+  - Inactive / unused phone list (asset cleanup)
+  - Device detail drawer for single-endpoint deep dive
+  - Filters by date, department, device status
+
+Business value:
+  Find broken or unused phones, and correlate bad quality with specific
+  hardware.
+
+
+--------------------------------------------------------------------------------
+10.14 EXPORT CDR / CMR TOOL
+--------------------------------------------------------------------------------
+
+What it is:
+  Guided data extractor for archives, audits, and offline analysis.
+
+Functionalities (wizard-style):
+  1) Choose export domain: CDR or CMR
+  2) Choose export type (records variants)
+  3) Set date preset or custom range
+  4) Apply telephony filters
+       department, extension mode, device, call type/status,
+       CMR quality, amount/duration ranges
+  5) Preview matching rows before download
+  6) Select format: CSV / Excel / PDF
+  7) Toggle included columns
+       headers, billing, destination, user, device,
+       quality metrics, network metrics
+  8) Select all or subset of filtered rows
+  9) Run export with progress modal
+ 10) Success card with file name / size / record count
+ 11) View export history of previous jobs
+
+Business value:
+  Controlled, repeatable extracts for auditors without dumping the
+  entire database.
+
+
+--------------------------------------------------------------------------------
+10.15 STANDARD TELECOM REPORTS CATALOG
+--------------------------------------------------------------------------------
+
+What it is:
+  Pre-formatted executive / audit report templates inside Reports Hub.
+
+Available formats:
+  1) Department Usage Report
+  2) Extension Usage Report
+  3) Daily Call Report
+  4) Monthly CDR Summary
+  5) High Usage Analysis Report
+  6) Tax & Statement Summary (billing report)
+
+Functionalities:
+  - Pick report from left catalog list
+  - Choose period (monthly / YTD)
+  - Optional department filter
+  - Preview printable canvas
+  - Print Report
+  - Export CSV of the active dataset
+
+Business value:
+  Consistent report layout for recurring monthly governance meetings.
+
+
+--------------------------------------------------------------------------------
+10.16 USER MANAGEMENT
+--------------------------------------------------------------------------------
+
+What it is:
+  Administration of people who use the portal / are linked to extensions.
+
+Functionalities:
+  - List users with role, department, extension, location, device model
+  - Search by name / email / employee ID
+  - Filter by role and department
+  - Add user modal (name, employee ID, email, role, extension, etc.)
+  - Toggle Active / Inactive
+  - Show monthly cost / calls where available
+  - Export users CSV
+
+Roles supported in data model:
+  - Administrator
+  - Billing Manager
+  - Department Manager
+  - Viewer
+
+Business value:
+  Controls who can access the system and links staff identity to
+  extensions for billing attribution.
+
+
+--------------------------------------------------------------------------------
+10.17 SYSTEM SETTINGS
+--------------------------------------------------------------------------------
+
+What it is:
+  Configuration panel for organization-wide telecom / billing rules.
+
+Tabs & functionalities:
+
+  A) General
+     - Organization name
+     - Airport code
+     - Currency / symbol (INR / ₹)
+     - Time zone
+     - Contact email & phone
+
+  B) Billing
+     - Default GST / tax rate (%)
+     - Billing cycle day of month
+     - Grace period (days)
+     - Rounding rule
+         CeilToMinute | ActualSeconds | CeilTo30Seconds
+
+  C) CDR Processing
+     - CDR retention days
+     - Auto-process interval (minutes)
+     - Duplicate record handling
+         Ignore | Overwrite | FlagForReview
+     - Email alerts enable/disable
+
+Actions:
+  - Save settings
+  - Reset to defaults (with confirm)
+  - Success feedback after save
+
+Business value:
+  Keeps billing policy and CDR processing rules aligned with airport
+  finance and compliance requirements.
+
+
+--------------------------------------------------------------------------------
+10.18 GLOBAL CROSS-CUTTING FUNCTIONALITIES
+--------------------------------------------------------------------------------
+
+These work across many screens:
+
+  1) CSV Export
+     Download tabular data as .csv with date-stamped filename.
+
+  2) Print
+     Open a clean print window for invoices / report canvases.
+
+  3) Currency formatting
+     All money shown in Indian Rupee format (₹ xx,xxx.xx).
+
+  4) Duration formatting
+     Seconds converted to MM:SS or HH:MM:SS for display.
+
+  5) Call cost calculation
+     Pulse-based rating + GST used by Rate Plans calculator and
+     conceptually by CDR billing amounts.
+
+  6) Status badges
+     Visual states for calls, invoices, extensions, users, quality.
+
+  7) Drawers & modals
+     Non-blocking detail inspection without leaving the list page.
+
+  8) Responsive layout
+     Works on desktop and smaller screens (collapsible sidebar,
+     wrapping toolbars, responsive grids).
+
+  9) Live status cues
+     Animated “Live” indicators for PBX/CDR operational feel.
+
+
+--------------------------------------------------------------------------------
+10.19 TYPICAL USER JOURNEYS (HOW FEATURES COMBINE)
+--------------------------------------------------------------------------------
+
+Journey A — Monthly billing close
+  Dashboard → confirm totals
+  → Rate Plans (verify tariffs)
+  → Billing → Generate Monthly Bill
+  → View Invoice → Export / Print
+  → Department Bills for chargeback
+
+Journey B — Investigate expensive extension
+  Dashboard High Usage table
+  → CDR Records (filter extension + high billing)
+  → Open detail drawer
+  → Individual Bills for that user
+  → Optionally Export filtered CDRs
+
+Journey C — Bad call quality complaint
+  CMR module / System Health
+  → Filter Poor quality or High jitter
+  → Device Reports → find phone model/location
+  → Recommend action from CMR detail
+
+Journey D — Audit pack for finance
+  Reports Hub → Standard Catalog or Export Tool
+  → Choose period + department
+  → Preview → CSV / Print
+
+
+================================================================================
+11. FEATURE MODULES (PAGES) — TECHNICAL MAP
+================================================================================
+
+----- 11.1 Dashboard (/dashboard) -----
+File: src/pages/dashboard/Dashboard.tsx
+
+Purpose: High-level CDR operations overview.
+
+Shows:
+  - KPI cards (total calls, talk time, billing amount, etc.)
+  - Daily call volume stacked/bar charts (Internal/Local/Mobile/STD/ISD)
+  - Department-wise usage
+  - Call type distribution (pie)
+  - Monthly billing trend (area)
+  - High-usage extensions table (budget exceeded flags)
+  - Quick export actions
+
+Data: Mostly embedded demo arrays in the page (also related mock in
+      mock-data/overviewData.ts and cdrData.ts). Charts use recharts.
+
+
+----- 11.2 CDR Records (/cdr) -----
+Files:
+  src/pages/cdr/CDRRecords.tsx          → thin wrapper
+  src/modules/cdr/records/pages/CDRRecordsPage.tsx
+
+Purpose: Browse, search, filter, and inspect call detail records.
+
+Features:
+  - Summary KPI cards
+  - Global search across CDR ID, user, extension, device, destination, dept
+  - Quick filters: All / Internal / External / International / Completed /
+                   Failed / High Billing / Long Duration
+  - Advanced filters: date range, time, extension mode, department, device,
+                      call type, status, duration & amount ranges
+  - Paginated / scrollable table with multi-select
+  - Detail drawer (CDRDetailDrawer) with full call + related CMR quality info
+
+Data: modules/cdr/records/mock/cdrRecordsData.ts
+Types: modules/cdr/records/types/index.ts (ComprehensiveCDRRecord)
+
+
+----- 11.3 Extensions (/extensions) -----
+File: src/pages/extensions/Extensions.tsx
+Service: extensionService
+
+Purpose: Manage airport telephone lines / extensions.
+
+Features:
+  - Search by extension, employee, location, phone number
+  - Filter by department and status (Active/Inactive/Suspended)
+  - Add new extension via modal
+  - Export CSV
+  - Shows monthly calls, usage hours, cost, type (SIP/Analog/etc.)
+
+
+----- 11.4 Departments (/departments) -----
+File: src/pages/departments/Departments.tsx
+Service: departmentService
+
+Purpose: Cost-center view of telecom usage by department.
+
+Features:
+  - Card grid per department with budget vs spend progress
+  - Extension count, calls, talk time, monthly cost
+  - Link to view department CDRs (/cdr?department=...)
+  - Export department summary CSV
+
+
+----- 11.5 Billing (/billing) -----
+File: src/pages/billing/Billing.tsx
+Service: billingService
+Components: GenerateBillModal, InvoiceModal
+
+Purpose: Monthly telecom billing & invoices with GST.
+
+Tabs:
+  1) Monthly Invoices  — list of billing periods, generate new bill, view invoice
+  2) Individual User Bills — embeds IndividualBills report module
+  3) Department Bills — embeds DepartmentBills report module
+
+Invoice statuses: Draft | Generated | Approved | Paid
+Default GST: 18%
+
+
+----- 11.6 Rate Plans (/rate-plans) -----
+File: src/pages/rate-plans/RatePlans.tsx
+Service: billingService.getRatePlans / updateRatePlan
+
+Purpose: Configure per-minute tariffs and pulse rules.
+
+Features:
+  - Table of rates by call type (Internal, Local, Mobile, STD, ISD, etc.)
+  - Edit rate / pulse / effective date
+  - Live billing calculator (duration → pulses → subtotal + GST)
+
+
+----- 11.7 Reports Hub (/reports) -----
+File: src/pages/reports/Reports.tsx
+
+Purpose: Central directory for all telecom analytics reports.
+
+Categories / cards:
+  - User Call History
+  - Top Users by Cost / Duration / Call Count
+  - System & Traffic Reports
+  - Device & Hardware Reports
+  - Export CDR Records
+  - Standard Telecom Reports Catalog (dept usage, extension usage,
+    daily call, monthly CDR, high usage, billing summary)
+
+Can open reports in-page (tabs) or navigate to dedicated routes.
+
+
+----- 11.8 Users (/users) -----
+File: src/pages/users/Users.tsx
+Service: userService
+
+Purpose: Portal user / staff management.
+
+Roles: Administrator | Billing Manager | Department Manager | Viewer
+
+Features:
+  - Search & filter by role / department
+  - Add user modal
+  - Toggle Active/Inactive
+  - Export CSV
+
+
+----- 11.9 Settings (/settings) -----
+File: src/pages/settings/Settings.tsx
+Service: settingsService
+
+Purpose: System / PBX configuration.
+
+Tabs:
+  - General  (organization, airport code, currency, timezone, contact)
+  - Billing  (tax rate, billing cycle day, grace period, rounding rule)
+  - CDR      (retention days, auto-process interval, duplicate handling,
+              email alerts)
+
+Settings persist only in memory (mock) for the current session unless
+extended later to a real API.
+
+
+================================================================================
+12. CDR MODULE (DETAILED)
+================================================================================
+
+The modern CDR domain lives under src/modules/cdr/ with self-contained
+pages, components, types, and mock data.
+
+----- 12.1 Records -----
+Path: modules/cdr/records/
+
+Components:
+  CDRHeader, CDRQuickFilters, CDRAdvancedFilters,
+  CDRRecordsTable, CDRDetailDrawer
+
+ComprehensiveCDRRecord includes:
+  - Caller info (user, extension, department, device)
+  - Destination info (number, type, country)
+  - Call metrics (type, duration, status, disconnect reason)
+  - Billing (tariff, rate, cost, tax, total, status)
+  - Optional relatedCmr quality summary
+
+----- 12.2 CMR (Call Management / Quality Records) -----
+Path: modules/cdr/cmr/
+
+Purpose: Voice quality & network QoS analysis linked to CDRs.
+
+Metrics tracked:
+  - Quality score / grade (Excellent, Good, Fair, Poor)
+  - Packet loss, jitter, latency, RTT
+  - Codec / media stats
+  - Quality issues & recommended actions
+  - Minute-by-minute QoS time series
+
+UI pieces:
+  Summary cards, quick/advanced filters, records table,
+  department & device summary tables, quality issues table,
+  detail drawer
+
+NOTE: CMR page module exists; routing is primarily accessed via
+reports/export flows and related drawers rather than a top-level
+sidebar item.
+
+----- 12.3 Export -----
+Path: modules/cdr/export/
+
+Wizard-style flow:
+  1) Choose CDR or CMR export type
+  2) Set date range & telephony filters
+  3) Preview filtered records
+  4) Choose format (CSV / Excel / PDF) and column toggles
+  5) Progress modal → success card
+  6) Export history section
+
+Actual download currently uses exportToCSV utility for CSV;
+Excel/PDF options are UI-complete demo flows.
+
+----- 12.4 Reports — User -----
+Path: modules/cdr/reports/user/
+
+Pages:
+  - UserCallHistory
+  - TopUsersByCost / TopUsersByDuration / TopUsersByCalls
+  - IndividualBills / DepartmentBills
+  - TopUsersByCharge (related)
+
+Shared components:
+  ReportFilter, ReportSummaryCards, ReportTable,
+  BillingSummary, CallDetailsDrawer, ExportReportButton
+
+----- 12.5 Reports — System -----
+Path: modules/cdr/reports/system/
+
+SystemReportsPage sub-tabs:
+  overview | departments | extensions | daily
+
+Shows trunk/SIP channel health, volume trends, peak usage,
+department/extension usage, CMR quality summary, billing trends.
+
+----- 12.6 Reports — Device -----
+Path: modules/cdr/reports/device/
+
+DeviceReportsPage sub-tabs:
+  usage | quality | departments | rankings | inactive
+
+Shows IP phone inventory, device-level billing/volume,
+quality issues, inactive devices, detail drawer.
+
+
+================================================================================
+13. SERVICES LAYER (DATA ACCESS)
+================================================================================
+
+All services live in src/services/ and return Promises that resolve after
+a short delay (~50ms) to mimic network latency.
+
+cdrService
+  - getDashboardStats, getDailyCallVolume, getDeptUsageData
+  - getCallTypeDistribution, getMonthlyBillingTrend
+  - getHighUsageExtensions
+  - getCDRRecords(filters), getCDRById(id)
+
+billingService
+  - getBillingPeriods, getBillingPeriodById
+  - getDepartmentBreakdown
+  - getRatePlans, updateRatePlan
+  - generateBill(periodName, startDate, endDate)
+
+extensionService
+  - getExtensions, addExtension
+
+departmentService
+  - getDepartments
+
+userService
+  - getUsers, addUser
+
+settingsService
+  - getSettings, updateSettings
+
+Design intent (noted in cdrService comments):
+  These functions are shaped to be swapped later with real HTTP calls
+  to a Node.js / Express backend without rewriting UI pages.
+
+
+================================================================================
+14. MOCK DATA STRATEGY
+================================================================================
+
+Shared mock data: src/mock-data/
+  cdrData.ts           CDR records + dashboard chart datasets
+  billingData.ts       Invoices, rate plans, dept bill breakdowns
+  extensionData.ts     Extension directory
+  departmentData.ts    Departments / budgets
+  userData.ts          Users + system settings defaults
+  overviewData.ts      Overview KPI / traffic / gateway demo data
+
+Module-local mock data (newer modules):
+  modules/cdr/records/mock/cdrRecordsData.ts
+  modules/cdr/cmr/mock/cmrRecordsData.ts
+  modules/cdr/export/mock/exportData.ts
+  modules/cdr/reports/user/mock/userReportsData.ts
+  modules/cdr/reports/system/mock/systemReportsData.ts
+  modules/cdr/reports/device/mock/deviceReportsData.ts
+
+Important:
+  Mutations (add user, generate bill, update rate) modify in-memory
+  arrays. Refreshing the browser resets to the original mock seed data
+  (except auth flag in localStorage).
+
+
+================================================================================
+15. TYPES & DOMAIN MODELS
+================================================================================
+
+Shared (src/types/):
+
+CDRRecord
+  id, cdrId, extension, department, caller/destination numbers,
+  callType, direction, timestamps, duration, rates, costs, billingStatus
+
+CallType: Internal | Local | STD | ISD | Mobile | Toll-Free
+CallDirection: Incoming | Outgoing | Internal
+BillingStatus: Billed | Unbilled | Exempted | Pending
+
+BillingPeriod
+  period, dates, call totals, subtotal, tax, total, status, invoiceNumber
+
+RatePlanItem
+  callType, ratePerMinute, pulseSeconds, effectiveDate, status
+
+Department
+  name, code, head, extensions, calls, cost, budgetAllocation
+
+Extension
+  extension number, employee, department, location, type, monthly metrics
+
+User
+  name, employeeId, email, role, extension, status, lastLogin
+
+SystemSettings
+  org profile, currency (INR), GST rate, billing cycle, rounding,
+  CDR retention, processing interval, alerts
+
+Module types (example ComprehensiveCDRRecord / ComprehensiveCMRRecord)
+are richer and used by the newer modular UI screens.
+
+
+================================================================================
+16. UTILITIES
+================================================================================
+
+src/utils/billingCalculator.ts
+  calculateCallCost(durationSeconds, ratePerMinute, pulseSeconds=60, taxPercent=18)
+    → billableMinutes, subtotal, taxAmount, totalAmount
+    Uses ceil(duration / pulse) billing blocks.
+
+  formatDuration(seconds) → HH:MM:SS or MM:SS
+  formatCurrency(amount)  → Indian Rupee format via Intl (en-IN)
+
+src/utils/exportUtils.ts
+  exportToCSV(data, filename, optionalHeaders)
+    Builds CSV blob and triggers browser download.
+
+  printElement(elementId)
+    Opens a print window with the element's HTML for printing reports/invoices.
+
+src/lib/utils.ts
+  cn(...classes) → merges Tailwind classes with clsx + tailwind-merge
+
+
+================================================================================
+17. SHARED UI COMPONENTS
+================================================================================
+
+src/components/common/
+  Badge / StatusBadge     Status chips (success, warning, danger, info)
+  Modal                   Dialog overlay
+  Drawer                  Side panel for record details
+  DataTable               Reusable table patterns
+  StatCard / PageHeader   KPI and page headings
+  Loading / EmptyState    Loading spinner and empty placeholders
+
+src/components/layout/
+  MainLayout              Shell with sidebar + header + outlet
+  Sidebar                 Nav menu, help modal, logout, PBX status widget
+  Header                  Dynamic title by route, search → /cdr?q=, clock,
+                          notifications, profile menu
+
+src/components/billing/
+  GenerateBillModal       Create a new billing period
+  InvoiceModal            View invoice details
+
+src/components/dashboard/
+  Chart and table widgets (CallTrafficChart, CallTypeChart,
+  DepartmentUsageChart, BillingTrendChart, TopUsersTable,
+  GatewayStatus, TrunkUtilization, etc.)
+
+
+================================================================================
+18. LAYOUT SYSTEM
+================================================================================
+
+MainLayout:
+  - Left fixed Sidebar (width 72 when open, 20 when collapsed)
+  - Content area padding adjusts with collapse state
+  - Provides Outlet context: { dateRange, setDateRange }
+    (DateRangePreset: today | yesterday | last7 | last30 | custom)
+
+Sidebar menu items:
+  Dashboard, CDR Records (Live badge), Extensions, Departments,
+  Billing, Reports, Rate Plans, Users, Settings
+  + Help & Guides modal
+  + PBX Trunks Active status widget
+  + Logout
+
+Header:
+  Maps pathname → title/subtitle
+  Global search navigates to CDR with query string
+  Live India-locale clock (en-IN)
+
+
+================================================================================
+19. STYLING & THEMING
+================================================================================
+
+- Tailwind CSS v4 via Vite plugin
+- Global CSS variables in index.css for background, card, primary,
+  muted, border, radius, etc.
+- Visual language: light theme, slate neutrals, teal accent (#0d9488 family)
+- Rounded-xl / rounded-2xl cards, soft borders, subtle shadows
+- Airport / telecom branding on login and sidebar
+
+
+================================================================================
+20. CHARTS & VISUALIZATION
+================================================================================
+
+Library: recharts
+
+Used across:
+  - Dashboard (BarChart, PieChart, AreaChart)
+  - System reports (volume / billing trends)
+  - Device reports (usage / billing trends)
+  - Various department and call-type breakdowns
+
+Colors are chosen per call type / status category in the mock datasets.
+
+
+================================================================================
+21. EXPORT & PRINT
+================================================================================
+
+CSV:
+  exportToCSV used on Dashboard, Billing, Departments, Extensions,
+  Users, Reports catalog, and Export module.
+
+Print:
+  printElement used for report preview areas / printable statements.
+
+Export module additionally simulates Excel/PDF generation with progress
+UI and history list (demo behavior).
+
+
+================================================================================
+22. BILLING CALCULATIONS
+================================================================================
+
+Formula (client utility):
+
+  pulses = ceil(durationSeconds / pulseSeconds)
+  billableMinutes = (pulses * pulseSeconds) / 60
+  subtotal = billableMinutes * ratePerMinute
+  taxAmount = subtotal * (taxPercent / 100)     // default 18% GST
+  totalAmount = subtotal + taxAmount
+
+Internal calls are typically free (rate 0).
+Rate Plans page includes a live calculator to demonstrate this logic.
+
+Invoice totals on Billing page come from billingService.generateBill()
+which currently returns precomputed demo numbers for the new period.
+
+
+================================================================================
+23. CURRENT LIMITATIONS & BACKEND READINESS
+================================================================================
+
+Current state:
+  - Frontend-only prototype with mock data
+  - Auth is demo-only (hardcoded user, localStorage flag)
+  - No real REST/GraphQL API integration
+  - No persistent database
+  - Some duplicated concepts (older components/cdr vs modules/cdr/records;
+    older CDR types vs ComprehensiveCDRRecord)
+  - Dashboard uses inline demo arrays rather than always going through services
+
+Ready for backend integration:
+  - Service layer already async and typed
+  - Clear domain models in src/types
+  - Pages already call services in useEffect patterns
+  - Export / filter / billing flows map cleanly to future API endpoints
+
+Suggested future API areas:
+  POST /auth/login
+  GET  /cdr?filters...
+  GET  /cmr
+  GET  /extensions, POST /extensions
+  GET  /departments
+  GET  /billing/periods, POST /billing/generate
+  GET/PUT /rate-plans
+  GET  /reports/...
+  GET/PUT /settings
+  GET  /users, POST /users
+
+
+================================================================================
+24. QUICK REFERENCE — KEY FILES
+================================================================================
+
+Entry & shell:
+  src/main.tsx
+  src/App.tsx
+  src/routes/AppRoutes.tsx
+  src/context/AuthContext.tsx
+  src/components/layout/MainLayout.tsx
+  src/components/layout/Sidebar.tsx
+  src/components/layout/Header.tsx
+
+Core pages:
+  src/pages/auth/Login.tsx
+  src/pages/dashboard/Dashboard.tsx
+  src/pages/billing/Billing.tsx
+  src/pages/reports/Reports.tsx
+  src/pages/rate-plans/RatePlans.tsx
+  src/pages/extensions/Extensions.tsx
+  src/pages/departments/Departments.tsx
+  src/pages/users/Users.tsx
+  src/pages/settings/Settings.tsx
+
+CDR module entry points:
+  src/modules/cdr/records/pages/CDRRecordsPage.tsx
+  src/modules/cdr/export/pages/ExportCdrCmrPage.tsx
+  src/modules/cdr/reports/system/pages/SystemReportsPage.tsx
+  src/modules/cdr/reports/device/pages/DeviceReportsPage.tsx
+  src/modules/cdr/reports/user/pages/*
+
+Services:
+  src/services/*.ts
+
+Utils:
+  src/utils/billingCalculator.ts
+  src/utils/exportUtils.ts
+
+
+================================================================================
+END OF DOCUMENT
+================================================================================
